@@ -1,0 +1,7 @@
+
+/build
+
+*.apk
+*.aar
+*.jar
+*.bundle
