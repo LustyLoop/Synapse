@@ -1,6 +1,7 @@
 package com.example.synapseapp.ui.theme.screens
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -40,6 +41,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
@@ -75,8 +77,10 @@ import viewModel.GadgetInfo
 import com.mikepenz.markdown.m3.markdownColor
 import com.mikepenz.markdown.m3.markdownTypography
 import com.mikepenz.markdown.model.rememberMarkdownState
-import data.aiAnswer
-
+import data.AiAnswerClass
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 //@Preview(showBackground = true)
@@ -86,6 +90,7 @@ import data.aiAnswer
 fun SharedScreen(
     navController: NavController,
     userChatMessages: UserChatMessages = viewModel(),
+    aiAnswer: AiAnswerClass = viewModel(),
     gadget: GadgetInfo = viewModel(),
     showTextInputField: Boolean,
 ) {
@@ -107,7 +112,6 @@ fun SharedScreen(
     val shaderBackground =
         if (isSystemInDarkTheme()) remember { DarkShaderBackground }
         else remember { LightShaderBackground }
-
     LaunchedEffect(Unit) {
         val start = withFrameNanos { it }
         while (true) {
@@ -248,13 +252,16 @@ fun SharedScreen(
             contentPadding = PaddingValues(
                 top = 70.dp,
                 bottom = 105.dp,
-                start = 20.dp
+                start = 5.dp
             ),
             reverseLayout = true
         ) {
             items(
                 items = userChatMessages.userAndAiMessages,
-                key = null
+                key = {
+                    Log.i("id", "System.identityHashCode(it): ${System.identityHashCode(it)}")
+                    System.identityHashCode(it)
+                }
             ) { box ->
                 Box(
                     modifier = Modifier.fillMaxSize()
@@ -289,7 +296,7 @@ fun SharedScreen(
                             Box(
                                 modifier = Modifier
                                     .align(Alignment.BottomStart)
-                                    .padding(top = 5.dp, start = 5.dp, end = 5.dp)
+                                    .padding(top = 5.dp, start = 0.dp, end = 5.dp)
                                     .background(
                                         color = AIMessageBackgroundColor,
                                         RoundedCornerShape(20.dp)
@@ -297,7 +304,6 @@ fun SharedScreen(
                             ) {
 
                                 SelectionContainer {
-
                                     val markdownState = rememberMarkdownState(
                                         content = box.text,
                                         retainState = true,
@@ -331,7 +337,11 @@ fun SharedScreen(
                                             ),
                                             quote = MaterialTheme.typography.bodyMedium.copy(
                                                 fontStyle = FontStyle.Italic
-                                            )
+                                            ),
+                                            code = MaterialTheme.typography.bodyMedium.copy(
+                                                fontStyle = FontStyle.Italic,
+                                                color = Color.White
+                                            ),
                                         )
                                     )
 
@@ -391,8 +401,7 @@ fun SharedScreen(
                     Spacer(modifier = Modifier.width(5.dp))
                     IconButton(
                         onClick = {
-
-                            aiAnswer(userChatMessages)
+                            aiAnswer.aiAnswerHandler(userChatMessages)
 
                             //gadget.batteryCharge += 1
                         }

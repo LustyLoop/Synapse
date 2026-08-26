@@ -6,6 +6,7 @@ import android.os.Looper
 import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -18,10 +19,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 
-class UserChatMessages(): ViewModel(){
+class UserChatMessages() : ViewModel() {
     var currentControlIcon by mutableStateOf(ChatIconState.SPEAK)
-    val state =  UserTextStateHolder.objectOfUserTextState
+    val state = UserTextStateHolder.objectOfUserTextState
     val userAndAiMessages = mutableStateListOf<ChatMessageBox>()
+
+    var currentId by mutableIntStateOf(0)
 
 
     fun chatHandler(navController: NavController) {
@@ -39,9 +42,8 @@ class UserChatMessages(): ViewModel(){
                         )
                     )
                     state.userText = ""
-                    Log.i("chatHandler", "userText: $state.userText")
-                    Log.i("chatHandler", "userMessages: ${state.userMessages}")
-                    Log.i("chatHandler", "userAndAiMessages: $userAndAiMessages")
+                    //Log.i("size", "userAndAiMessages.size: ${userAndAiMessages.size}")
+
                 }
 
                 ChatIconState.SPEAK -> {
@@ -60,102 +62,88 @@ class UserChatMessages(): ViewModel(){
 
 
     @Composable
-    fun IconHandler(){
-        currentControlIcon = if(state.userText.isEmpty()){
+    fun IconHandler() {
+        currentControlIcon = if (state.userText.isEmpty()) {
             ChatIconState.SPEAK
-        } else{
+        } else {
             ChatIconState.SEND
         }
     }
 }
 
-fun aiAnswer(viewModelObj: UserChatMessages){
+class AiAnswerClass() : ViewModel() {
     val testAii = """
-# Заголовок первого уровня (h1)
+# Пример Markdown-документа
 
-## Заголовок второго уровня (h2)
+Это демонстрационный файл, который содержит различные элементы разметки и блоки кода для проверки работы рендерера.
 
-### Заголовок третьего уровня (h3)
+## Списки и форматирование
 
-#### Заголовок четвёртого уровня (h4)
-
-##### Заголовок пятого уровня (h5)
-
-###### Заголовок шестого уровня (h6)
+Вы можете использовать **жирный текст** или *курсив*, а также создавать списки:
+* Первое важное правило оптимизации.
+* Второе правило — уводить вычисления в фон.
+* Поддержка `inline-кода` прямо внутри строки.
 
 ---
 
-## Обычный текст и форматирование
+## Примеры исходного кода
 
-Это обычный параграф текста. Он демонстрирует, как выглядит стандартный текст в вашей теме.
+Ниже представлены блоки кода с указанием языка для корректной подсветки синтаксиса.
 
-**Жирный текст** и *курсивный текст*. Можно их комбинировать: ***жирный курсив***.
+### 1. Корутина в Jetpack Compose (Kotlin)
 
-~~Зачёркнутый текст~~ (поддерживается GFM).
+Этот код демонстрирует, как правильно запускать фоновые вычисления, чтобы они на 100% не блокировали основной UI-поток приложения:
 
-Это `встроенный код` в предложении.
+```kotlin
+// Запуск корутины на фоновом диспетчере
+LaunchedEffect(Unit) {
+    withContext(Dispatchers.Default) {
+        val startNanos = System.nanoTime()
+        while (isActive) {
+            val currentNanos = System.nanoTime()
+            // Безопасный расчет времени для шейдера
+            time = (currentNanos - startNanos) / 1_000_000_000f
+            delay(16) // Ограничение ~60 FPS
+        }
+    }
+}
+```
 
-## Ссылки
+### 2. Код Android Runtime Shader (AGSL)
 
-[Обычная ссылка на GitHub](https://github.com/mikepenz/multiplatform-markdown-renderer)
+А это пример простого шейдера, который принимает время и координаты, а затем плавно меняет цвет пикселей на GPU:
 
-[Ссылка с заголовком](https://github.com "Подсказка при наведении")
+```glsl
+uniform float2 iResolution;
+uniform float iTime;
 
-## Списки
+half4 main(in float2 fragCoord) {
+    // Нормализация координат от 0.0 до 1.0
+    float2 uv = fragCoord / iResolution.xy;
+    
+    // Плавная анимация цвета на основе синусоиды от времени
+    float red = 0.5 + 0.5 * sin(iTime + uv.x * 5.0);
+    float green = 0.5 + 0.5 * cos(iTime + uv.y * 5.0);
+    
+    return half4(red, green, 0.7, 1.0);
+}
+```
 
-### Нумерованный список
-1. Первый пункт
-2. Второй пункт
-   1. Вложенный пункт 2.1
-   2. Вложенный пункт 2.2
-3. Третий пункт
+> **Важное примечание:** Блоки кода выделяются тройными обратными апострофами (`` ` ``). Сразу после первых трех апострофов указывается имя языка (например, `kotlin` или `glsl`), чтобы рендерер применил правильные правила цветовой схемы.
 
-### Маркированный список
-- Пункт 1
-- Пункт 2
-  - Вложенный пункт 2.1
-  - Вложенный пункт 2.2
-- Пункт 3
-
-### Чекбоксы (GFM Task Lists)
-- [x] Выполненная задача
-- [ ] Невыполненная задача
-- [ ] Ещё одна задача
-
-## Цитаты
-
-> Это обычная цитата.
-> Она может занимать несколько строк.
-
-> [!NOTE]
-> Это GitHub Alert типа NOTE. Полезная информация.
-
-> [!TIP]
-> Это GitHub Alert типа TIP. Совет, как сделать лучше.
-
-> [!IMPORTANT]
-> Это GitHub Alert типа IMPORTANT. Ключевая информация.
-
-> [!WARNING]
-> Это GitHub Alert типа WARNING. Срочное предупреждение.
-
-> [!CAUTION]
-> Это GitHub Alert типа CAUTION. Осторожно, возможны проблемы.
-
-## Код
-
-### Встроенный код
-Для вывода переменной используйте `println("Hello")`.
-
-### Блок кода (без подсветки)
     """.trimIndent()
 
-    viewModelObj.userAndAiMessages.add(0,
-        ChatMessageBox(
-            role = IdentifyRole.AI,
-            type = IdentifyTypeMessage.TEXT,
-            text = testAii
-        )
-    )
+    fun aiAnswerHandler(viewModelObj: UserChatMessages) {
+        viewModelScope.launch(Dispatchers.IO) {
+            viewModelObj.userAndAiMessages.add(
+                0,
+                ChatMessageBox(
+                    role = IdentifyRole.AI,
+                    type = IdentifyTypeMessage.TEXT,
+                    text = testAii
+                )
+            )
+        }
+    }
 }
 
