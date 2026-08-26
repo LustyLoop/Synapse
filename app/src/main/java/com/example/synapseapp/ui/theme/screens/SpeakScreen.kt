@@ -1,4 +1,4 @@
-package com.example.glassesapp.ui.theme.screens
+package com.example.synapseapp.ui.theme.screens
 
 
 import androidx.compose.runtime.Composable

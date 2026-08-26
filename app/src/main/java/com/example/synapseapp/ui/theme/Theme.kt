@@ -1,4 +1,4 @@
-package com.example.glassesapp.ui.theme
+package com.example.synapseapp.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme

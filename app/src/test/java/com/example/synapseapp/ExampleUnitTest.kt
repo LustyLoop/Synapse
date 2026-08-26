@@ -1,4 +1,4 @@
-package com.example.glassesapp
+package com.example.synapseapp
 
 import org.junit.Test
 

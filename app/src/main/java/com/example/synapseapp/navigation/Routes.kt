@@ -1,4 +1,4 @@
-package com.example.glassesapp.navigation
+package com.example.synapseapp.navigation
 
 object Routes {
     const val MAIN_SCREEN = "Main"

@@ -1,4 +1,4 @@
-package com.example.glassesapp.ui.theme
+package com.example.synapseapp.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

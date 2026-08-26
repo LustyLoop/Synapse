@@ -1,9 +1,12 @@
 package shaders
 
 import android.graphics.RuntimeShader
+import android.os.Build
+import androidx.annotation.RequiresApi
 
-
-val ballShader = RuntimeShader("""
+val ballShader: RuntimeShader? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+    RuntimeShader(
+        """
 uniform float2 resolution;
 uniform float time;
 
@@ -123,4 +126,7 @@ half4 main(float2 fragCoord) {
     return half4(color, mask);
 }
 """.trimIndent()
-)
+    )
+} else {
+    null
+}

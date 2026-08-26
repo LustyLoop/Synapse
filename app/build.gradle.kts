@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.glassesapp"
+    namespace = "com.example.synapseapp"
     compileSdk {
         version = release(37) {
             minorApiLevel = 1
@@ -12,7 +12,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.glassesapp"
+        applicationId = "com.example.synapseapp"
         minSdk = 28
         targetSdk = 37
         versionCode = 1
@@ -23,8 +23,8 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = true // было false
-            isShrinkResources = true // было false
+            isMinifyEnabled = false // было false
+            isShrinkResources = false // было false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -32,8 +32,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     buildFeatures {
         compose = true
@@ -60,4 +60,8 @@ dependencies {
     implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.11.0")
     implementation ("androidx.activity:activity-ktx:1.13.0")
     implementation("androidx.navigation:navigation-compose:2.8.0")
+
+    implementation("com.mikepenz:multiplatform-markdown-renderer:0.43.0")
+    implementation("com.mikepenz:multiplatform-markdown-renderer-m3:0.43.0")
 }
+

@@ -1,4 +1,4 @@
-package com.example.glassesapp
+package com.example.synapseapp
 
 
 
@@ -16,10 +16,10 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.glassesapp.navigation.Routes
-import com.example.glassesapp.ui.theme.MyAppTheme
-import com.example.glassesapp.ui.theme.screens.MainScreen
-import com.example.glassesapp.ui.theme.screens.SpeakScreen
+import com.example.synapseapp.navigation.Routes
+import com.example.synapseapp.ui.theme.MyAppTheme
+import com.example.synapseapp.ui.theme.screens.MainScreen
+import com.example.synapseapp.ui.theme.screens.SpeakScreen
 
 
 class MainActivity : ComponentActivity() {
