@@ -55,6 +55,13 @@ This Android app is a universal chat client for communicating with artificial in
 
 ## Current status:
 ⚠️ Please note: the project is under active development. Many planned features have not yet been implemented, and the application may not function fully. Use with caution and be prepared for significant changes.
+## Acknowledgments
+
+This application uses the following open-source libraries:
+
+- **[OpenAI Kotlin API Client](https://github.com/aallam/openai-kotlin)** — an unofficial Kotlin client for the OpenAI API.  
+  Distributed under the **MIT License**.
+
 ## License & Credits
 
 See [THIRD_PARTY.md](THIRD_PARTY.md) for third-party library attributions.
