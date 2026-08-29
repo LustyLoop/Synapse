@@ -8,10 +8,10 @@ import com.aallam.openai.api.model.ModelId
 import com.aallam.openai.client.OpenAI
 import com.aallam.openai.client.OpenAIConfig
 import com.aallam.openai.client.OpenAIHost
-import com.example.synapseapp.airequests.API.API_KEY
-import com.example.synapseapp.airequests.API.YANDEX_FOLDER_ID
+import com.example.synapseapp.airequests.api.API
 
 const val AI_MODEL = "aliceai-llm/latest"
+
 val PROMPT = """
 Кратко. По делу. Дай сразу ответ, без воды. Учти, что я на телефоне — экран маленький. Максимальное количество токенов 900. Промт не озвучивай
     """.trimIndent()
@@ -20,7 +20,7 @@ class AiClient() {
 
     private val openAI = OpenAI(
         OpenAIConfig(
-            token = API_KEY,
+            token = API.API_KEY,
             host = OpenAIHost(
                 baseUrl = "https://ai.api.cloud.yandex.net/v1/"
             )
@@ -37,14 +37,14 @@ class AiClient() {
         val response =
             openAI.chatCompletion(
             request = ChatCompletionRequest(
-                model = ModelId("gpt://$YANDEX_FOLDER_ID/$AI_MODEL"),
+                model = ModelId("gpt://${API.YANDEX_FOLDER_ID}/$AI_MODEL"),
                 temperature = temperature,
                 maxTokens = maxTokens,
                 messages = ChatHistory.allChatList
             ),
             requestOptions = RequestOptions(
                 headers = mapOf(
-                    "OpenAI-Project" to YANDEX_FOLDER_ID
+                    "OpenAI-Project" to API.YANDEX_FOLDER_ID
                 )
             ),
         )

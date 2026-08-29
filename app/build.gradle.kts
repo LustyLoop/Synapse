@@ -1,8 +1,10 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 }
-
+val aPI_KEY = project.properties["API_KEY"]
+val yANDEX_FOLDER_ID = project.properties["YANDEX_FOLDER_ID"]
 android {
     namespace = "com.example.synapseapp"
     compileSdk {
@@ -38,6 +40,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -67,7 +70,6 @@ dependencies {
     implementation(platform("com.aallam.openai:openai-client-bom:4.1.0"))
     implementation("com.aallam.openai:openai-client")
     runtimeOnly("io.ktor:ktor-client-okhttp")
-    //implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
     implementation("com.mikepenz:multiplatform-markdown-renderer:0.43.0")
     implementation("com.mikepenz:multiplatform-markdown-renderer-m3:0.43.0")
