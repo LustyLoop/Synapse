@@ -23,7 +23,7 @@ fun SpeakScreen(
             if (state.userMessages.isEmpty()) {
                 Shaders.currentShader = AllShaders.Wave
                 state.hideShaderFlag.value = false
-            }
+        }
         }
     }
 

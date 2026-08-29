@@ -14,6 +14,7 @@ enum class IdentifyTypeMessage(){
 }
 
 data class ChatMessageBox(
+    var id: String = "",
     val role: IdentifyRole = IdentifyRole.NULL,
     val type: IdentifyTypeMessage = IdentifyTypeMessage.NULL,
     val text: String,

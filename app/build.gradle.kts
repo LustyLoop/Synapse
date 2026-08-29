@@ -23,8 +23,8 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false // было false
-            isShrinkResources = false // было false
+            isMinifyEnabled = false
+            isShrinkResources = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -32,17 +32,20 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
     buildFeatures {
         compose = true
     }
 }
 
+
 dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)
@@ -61,7 +64,13 @@ dependencies {
     implementation ("androidx.activity:activity-ktx:1.13.0")
     implementation("androidx.navigation:navigation-compose:2.8.0")
 
+    implementation(platform("com.aallam.openai:openai-client-bom:4.1.0"))
+    implementation("com.aallam.openai:openai-client")
+    runtimeOnly("io.ktor:ktor-client-okhttp")
+    //implementation("com.squareup.okhttp3:okhttp:4.12.0")
+
     implementation("com.mikepenz:multiplatform-markdown-renderer:0.43.0")
     implementation("com.mikepenz:multiplatform-markdown-renderer-m3:0.43.0")
+    implementation("com.mikepenz:multiplatform-markdown-renderer-code:0.43.0")
 }
 

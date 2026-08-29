@@ -43,7 +43,6 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -57,8 +56,6 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.Shader
 import androidx.compose.ui.graphics.ShaderBrush
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.zIndex
 import data.IdentifyRole
 import data.UserChatMessages
@@ -67,21 +64,19 @@ import shaders.DarkShaderBackground
 import kotlin.random.Random
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.synapseapp.airequests.AI
 import com.example.synapseapp.ui.theme.AIMessageBackgroundColor
-import com.mikepenz.markdown.m3.Markdown
 import data.AllShaders
 import data.Shaders
 import shaders.ballShader
 import shaders.LightShaderBackground
 import viewModel.GadgetInfo
-import com.mikepenz.markdown.m3.markdownColor
-import com.mikepenz.markdown.m3.markdownTypography
-import com.mikepenz.markdown.model.rememberMarkdownState
 import data.AiAnswerClass
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
-
+import com.example.synapseapp.ui.theme.AiMessageMarkdown
 
 //@Preview(showBackground = true)
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
@@ -93,11 +88,12 @@ fun SharedScreen(
     aiAnswer: AiAnswerClass = viewModel(),
     gadget: GadgetInfo = viewModel(),
     showTextInputField: Boolean,
+
 ) {
     val state = UserTextStateHolder.objectOfUserTextState
     val hideAndShowProgress by animateFloatAsState(
         targetValue = if (state.hideShaderFlag.value) {
-            0.5f
+            1.0f
         } else {
             0f
         },
@@ -113,10 +109,13 @@ fun SharedScreen(
         if (isSystemInDarkTheme()) remember { DarkShaderBackground }
         else remember { LightShaderBackground }
     LaunchedEffect(Unit) {
-        val start = withFrameNanos { it }
-        while (true) {
-            withFrameNanos { frameTime ->
-                time = (frameTime - start) / 1_000_000_000f
+        withContext(Dispatchers.Default) {
+            val startNanos = System.nanoTime()
+            while (isActive) {
+                val currentNanos = System.nanoTime()
+                // Безопасный расчет времени для шейдера
+                time = (currentNanos - startNanos) / 1_000_000_000f
+                delay(10) // Ограничение ~60 FPS
             }
         }
     }
@@ -248,24 +247,24 @@ fun SharedScreen(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
+                .navigationBarsPadding()
+                .imePadding()
                 .zIndex(-1f),
             contentPadding = PaddingValues(
                 top = 70.dp,
-                bottom = 105.dp,
+                bottom = 80.dp,
                 start = 5.dp
             ),
             reverseLayout = true
         ) {
             items(
                 items = userChatMessages.userAndAiMessages,
-                key = {
-                    Log.i("id", "System.identityHashCode(it): ${System.identityHashCode(it)}")
-                    System.identityHashCode(it)
-                }
+                key = { it.id }
             ) { box ->
                 Box(
                     modifier = Modifier.fillMaxSize()
                 ) {
+
                     when (box.role) {
                         IdentifyRole.USER -> {
                             Box(
@@ -302,53 +301,11 @@ fun SharedScreen(
                                         RoundedCornerShape(20.dp)
                                     )
                             ) {
-
                                 SelectionContainer {
-                                    val markdownState = rememberMarkdownState(
-                                        content = box.text,
-                                        retainState = true,
-                                        immediate = true // Парсим сразу, убирая белые экраны
-                                    )
-
-                                    Markdown(
-                                        modifier = Modifier.padding(5.dp),
-                                        markdownState = markdownState, // Оставляем ТОЛЬКО стейт
-                                        colors = markdownColor(
-                                            text = MaterialTheme.colorScheme.onSurface,
-                                            codeBackground = Color(0xFF2D2D2D),
-                                            dividerColor = Color.Gray,
-                                        ),
-                                        typography = markdownTypography(
-                                            h1 = MaterialTheme.typography.headlineLarge.copy(
-                                                fontFamily = MaterialTheme.typography.titleLarge.fontFamily
-                                            ),
-                                            h2 = MaterialTheme.typography.headlineMedium.copy(
-                                                fontFamily = MaterialTheme.typography.titleMedium.fontFamily
-                                            ),
-                                            h3 = MaterialTheme.typography.headlineMedium.copy(
-                                                fontFamily = MaterialTheme.typography.titleSmall.fontFamily
-                                            ),
-                                            text = MaterialTheme.typography.bodyLarge.copy(
-                                                fontFamily = MaterialTheme.typography.bodyMedium.fontFamily
-                                            ),
-                                            inlineCode = MaterialTheme.typography.bodyMedium.copy(
-                                                fontFamily = FontFamily.Monospace,
-                                                color = Color.White
-                                            ),
-                                            quote = MaterialTheme.typography.bodyMedium.copy(
-                                                fontStyle = FontStyle.Italic
-                                            ),
-                                            code = MaterialTheme.typography.bodyMedium.copy(
-                                                fontStyle = FontStyle.Italic,
-                                                color = Color.White
-                                            ),
-                                        )
-                                    )
-
+                                    AiMessageMarkdown(box)
                                 }
                             }
                         }
-
                         else -> {
                             Box(
                                 modifier = Modifier
@@ -395,16 +352,11 @@ fun SharedScreen(
                 Row(
                     modifier = Modifier.fillMaxSize(),
                     verticalAlignment = Alignment.CenterVertically
-
                 ) {
-
+                    val scope = rememberCoroutineScope()
                     Spacer(modifier = Modifier.width(5.dp))
                     IconButton(
-                        onClick = {
-                            aiAnswer.aiAnswerHandler(userChatMessages)
-
-                            //gadget.batteryCharge += 1
-                        }
+                        onClick = {}
                     )
                     {
                         Icon(
@@ -443,6 +395,7 @@ fun SharedScreen(
                         onClick = {
                             keyboardController?.hide()
                             userChatMessages.chatHandler(navController)
+                            aiAnswer.aiAnswerHandler(userChatMessages)
                         },
                         modifier = Modifier
                             .size(35.dp),
