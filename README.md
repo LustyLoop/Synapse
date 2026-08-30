@@ -61,6 +61,8 @@ This application uses the following open-source libraries:
 
 - **[OpenAI Kotlin API Client](https://github.com/aallam/openai-kotlin)** — an unofficial Kotlin client for the OpenAI API.  
   Distributed under the **MIT License**.
+- **[compose-icons](https://github.com/DevSrSouza/compose-icons)** — a collection of high-quality icons for Compose Multiplatform by [DevSrSouza](https://github.com/DevSrSouza).  
+  Distributed under the **MIT License**.
 
 ## License & Credits
 
