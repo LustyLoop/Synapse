@@ -15,7 +15,7 @@ import com.example.synapseapp.navigation.Routes
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.UUID
-
+import data.AiAnswerClass
 
 class UserChatMessages() : ViewModel() {
     var currentControlIcon by mutableStateOf(ChatIconState.SPEAK)
@@ -24,7 +24,7 @@ class UserChatMessages() : ViewModel() {
 
 
 
-    fun chatHandler(navController: NavController) {
+    fun chatHandler(aiAnswer :AiAnswerClass, userChatMessages: UserChatMessages,navController: NavController) {
         viewModelScope.launch(Dispatchers.IO) {
             when (currentControlIcon) {
                 ChatIconState.SEND -> {
@@ -41,8 +41,8 @@ class UserChatMessages() : ViewModel() {
                     )
 
                     state.userText = ""
+                    aiAnswer.aiAnswerHandler(userChatMessages)
                 }
-
                 ChatIconState.SPEAK -> {
                     state.hideShaderFlag.value = true
                     Handler(Looper.getMainLooper()).postDelayed({

@@ -9,7 +9,7 @@ import com.aallam.openai.api.chat.ChatMessage
 
 object ChatHistory {
     private val _allChatList =  mutableStateListOf<ChatMessage>(
-        ChatMessage(role = ChatRole.System, content = PROMPT)
+        ChatMessage(role = ChatRole.System, content = prompt)
     )
     val allChatList = _allChatList
 
@@ -24,6 +24,11 @@ object ChatHistory {
     fun removeMessage(message: ChatMessage) {
         _allChatList.remove(message)
 
+    }
+    fun removeLastMessage(){
+        if (_allChatList.isNotEmpty()) {
+            _allChatList.removeAt(_allChatList.lastIndex)
+        }
     }
     fun setPrompt(prompt: String){
         _allChatList[0] = ChatMessage(role = ChatRole.System, content = prompt)

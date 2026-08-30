@@ -1,7 +1,6 @@
 package com.example.synapseapp.ui.theme.screens
 
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -27,7 +26,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -41,7 +39,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -64,7 +61,6 @@ import shaders.DarkShaderBackground
 import kotlin.random.Random
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.synapseapp.airequests.AI
 import com.example.synapseapp.ui.theme.AIMessageBackgroundColor
 import data.AllShaders
 import data.Shaders
@@ -78,17 +74,20 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 import com.example.synapseapp.ui.theme.AiMessageMarkdown
 
+
 //@Preview(showBackground = true)
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SharedScreen(
+fun SampleScreen(
     navController: NavController,
     userChatMessages: UserChatMessages = viewModel(),
     aiAnswer: AiAnswerClass = viewModel(),
     gadget: GadgetInfo = viewModel(),
-    showTextInputField: Boolean,
-
+    BottomBox: @Composable (modifier: Modifier,
+                navController: NavController,
+                userChatMessages: UserChatMessages,
+                aiAnswer: AiAnswerClass) -> Unit
 ) {
     val state = UserTextStateHolder.objectOfUserTextState
     val hideAndShowProgress by animateFloatAsState(
@@ -104,7 +103,6 @@ fun SharedScreen(
     val ballShader = remember { ballShader }
     var time by remember { mutableFloatStateOf(0f) }
     val rand = remember { Random.nextFloat() }
-    val keyboardController = LocalSoftwareKeyboardController.current
     val shaderBackground =
         if (isSystemInDarkTheme()) remember { DarkShaderBackground }
         else remember { LightShaderBackground }
@@ -215,10 +213,12 @@ fun SharedScreen(
             contentPadding = PaddingValues(0.dp),
             colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.surface)
         ) {
-            Icon(
-                imageVector = Icons.Rounded.Menu,
+            Image(
+                modifier = Modifier
+                    .size(27.dp),
+                painter = painterResource(R.drawable.menu_ic),
                 contentDescription = "Меню",
-                tint = MaterialTheme.colorScheme.onBackground
+                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onBackground)
             )
         }
         /*-----------------------------------------------------------------------------*/
@@ -264,15 +264,14 @@ fun SharedScreen(
                 Box(
                     modifier = Modifier.fillMaxSize()
                 ) {
-
                     when (box.role) {
                         IdentifyRole.USER -> {
                             Box(
                                 modifier = Modifier
                                     .align(Alignment.BottomEnd)
                                     .padding(
-                                        top = 8.dp,
-                                        end = 15.dp,
+                                        top = 15.dp,
+                                        end = 5.dp,
                                         start = 40.dp
                                     )
                                     .background(
@@ -297,8 +296,7 @@ fun SharedScreen(
                                     .align(Alignment.BottomStart)
                                     .padding(top = 5.dp, start = 0.dp, end = 5.dp)
                                     .background(
-                                        color = AIMessageBackgroundColor,
-                                        RoundedCornerShape(20.dp)
+                                        color = AIMessageBackgroundColor
                                     )
                             ) {
                                 SelectionContainer {
@@ -329,91 +327,21 @@ fun SharedScreen(
             }
 
         }
-
-
-        if (showTextInputField)
-            Box(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .navigationBarsPadding()
-                    .imePadding()
-                    .fillMaxWidth()
-                    .padding(
-                        bottom = 10.dp,
-                        start = 20.dp,
-                        end = 20.dp
-                    )
-                    .height(60.dp)
-                    .background(
-                        color = MaterialTheme.colorScheme.surface,
-                        RoundedCornerShape(40.dp)
-                    )
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    val scope = rememberCoroutineScope()
-                    Spacer(modifier = Modifier.width(5.dp))
-                    IconButton(
-                        onClick = {}
-                    )
-                    {
-                        Icon(
-                            imageVector = Icons.Rounded.Add,
-                            contentDescription = "Прикрепить файл",
-                            modifier = Modifier
-                                .size(30.dp),
-                            tint = MaterialTheme.colorScheme.onBackground
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(3.dp))
-
-                    BasicTextField(
-                        value = state.userText,
-                        onValueChange = { state.userText = it },
-                        textStyle = MaterialTheme.typography.bodyMedium.copy(
-                            color = MaterialTheme.colorScheme.onSurface
-                        ),
-                        modifier = Modifier
-                            .weight(1f),
-                        decorationBox = { innerTextField ->
-                            Box {
-                                if (state.userText.isEmpty()) {
-                                    Text(
-                                        text = "Задайте ваш вопрос...",
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        style = MaterialTheme.typography.bodyMedium
-                                    )
-                                }
-                                innerTextField()
-                            }
-                        }
-                    )
-                    Spacer(modifier = Modifier.width(13.dp))
-                    Button(
-                        onClick = {
-                            keyboardController?.hide()
-                            userChatMessages.chatHandler(navController)
-                            aiAnswer.aiAnswerHandler(userChatMessages)
-                        },
-                        modifier = Modifier
-                            .size(35.dp),
-                        contentPadding = PaddingValues(0.dp),
-                        colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary)
-                    )
-                    {
-                        Icon(
-                            imageVector = userChatMessages.currentControlIcon.imageVector,
-                            contentDescription = userChatMessages.currentControlIcon.contentDescription,
-                            modifier = Modifier
-                                .size(27.dp),
-                            tint = MaterialTheme.colorScheme.background
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(17.dp))
-                }
-            }
+        BottomBox(
+            Modifier
+                .align(Alignment.BottomCenter)
+                .navigationBarsPadding()
+                .imePadding()
+                .fillMaxWidth()
+                .padding(
+                    bottom = 10.dp,
+                    start = 20.dp,
+                    end = 20.dp
+                ),
+            navController,
+            userChatMessages,
+            aiAnswer
+        )
         Box(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -436,5 +364,87 @@ fun SharedScreen(
 @Composable
 fun MainScreen(navController: NavController) {
     Shaders.currentShader = AllShaders.Wave
-    SharedScreen(navController, showTextInputField = true)
+    SampleScreen(
+        navController = navController,
+        BottomBox = ::TextFieldBottomBox
+    )
+}
+@Composable
+fun TextFieldBottomBox(
+    modifier: Modifier,
+    navController: NavController,
+    userChatMessages: UserChatMessages,
+    aiAnswer: AiAnswerClass
+    ){
+    val state = UserTextStateHolder.objectOfUserTextState
+    val keyboardController = LocalSoftwareKeyboardController.current
+    Box(modifier = modifier
+        .background(
+        color = MaterialTheme.colorScheme.surface,
+        RoundedCornerShape(40.dp))
+       .height(60.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxSize(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Spacer(modifier = Modifier.width(5.dp))
+            IconButton(
+                onClick = {}
+            )
+            {
+                Icon(
+                    imageVector = Icons.Rounded.Add,
+                    contentDescription = "Прикрепить файл",
+                    modifier = Modifier
+                        .size(30.dp),
+                    tint = MaterialTheme.colorScheme.onBackground
+                )
+            }
+            Spacer(modifier = Modifier.width(3.dp))
+
+            BasicTextField(
+                value = state.userText,
+                onValueChange = { state.userText = it },
+                textStyle = MaterialTheme.typography.bodyMedium.copy(
+                    color = MaterialTheme.colorScheme.onSurface
+                ),
+                modifier = Modifier
+                    .weight(1f),
+                decorationBox = { innerTextField ->
+                    Box {
+                        if (state.userText.isEmpty()) {
+                            Text(
+                                text = "Задайте ваш вопрос...",
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                        innerTextField()
+                    }
+                }
+            )
+            Spacer(modifier = Modifier.width(13.dp))
+            Button(
+                onClick = {
+                    keyboardController?.hide()
+                    userChatMessages.chatHandler(aiAnswer,userChatMessages,navController) // оптимизировать
+                },
+                modifier = Modifier
+                    .size(35.dp),
+                contentPadding = PaddingValues(0.dp),
+                colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary)
+            )
+            {
+                Icon(
+                    imageVector = userChatMessages.currentControlIcon.imageVector,
+                    contentDescription = userChatMessages.currentControlIcon.contentDescription,
+                    modifier = Modifier
+                        .size(27.dp),
+                    tint = MaterialTheme.colorScheme.background
+                )
+            }
+            Spacer(modifier = Modifier.width(17.dp))
+        }
+    }
 }
