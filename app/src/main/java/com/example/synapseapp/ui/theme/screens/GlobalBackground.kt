@@ -58,22 +58,22 @@ fun GlobalBackground(){
         animationSpec = tween(durationMillis = 1000),
         label = "HideAnimation"
     )
+    LaunchedEffect(Unit) {
+        state.hideShaderFlag.value = false
+    }
     val transitionProgress by animateFloatAsState(
         targetValue = if (transitionFlag)  1.0f else 0f,
         animationSpec = tween(durationMillis = 2100),
-        label = "HideAnimation"
+        label = "transitionProgressAnimation"
     )
     val rand = remember { Random.nextFloat() }
     val shaderBackground = remember { ShaderBackground }
-
-
     Box(
         modifier = Modifier
             .fillMaxSize()
             .statusBarsPadding()
             .then(
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-
                     Modifier.drawWithCache {
                         shaderBackground?.setFloatUniform(
                             "resolution",
@@ -83,10 +83,10 @@ fun GlobalBackground(){
                         shaderBackground?.setFloatUniform("rand", rand)
                         shaderBackground?.setFloatUniform("transitionProgress", transitionProgress)
                         shaderBackground?.setFloatUniform("inDarkTheme", inDarkTheme)
-//                            shaderBackground?.setFloatUniform(
-//                                "hideAndShowProgress",
-//                                hideAndShowProgress
-//                            )
+                            shaderBackground?.setFloatUniform(
+                                "hideAndShowProgress",
+                                hideAndShowProgress
+                            )
                         onDrawBehind {
                             shaderBackground?.setFloatUniform("time", ShaderFlags.time)
                             drawRect(brush = ShaderBrush(shaderBackground as Shader))

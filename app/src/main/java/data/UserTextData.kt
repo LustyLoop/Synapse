@@ -9,7 +9,7 @@ import androidx.lifecycle.ViewModel
 class UserTextClass(): ViewModel() {
     val userMessages = mutableStateListOf<String>()
     var userText by mutableStateOf("")
-    var hideShaderFlag = mutableStateOf<Boolean>(false)
+    var hideShaderFlag = mutableStateOf<Boolean>(true)
 }
 object UserTextStateHolder{
     val objectOfUserTextState = UserTextClass()

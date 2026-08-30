@@ -4,6 +4,7 @@ package com.example.synapseapp.ui.theme.screens
 import android.os.Handler
 import android.os.Looper
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -46,27 +47,17 @@ import data.UserChatMessages
 import data.UserTextStateHolder
 
 @Composable
-fun ReturnBack(){
-    val state =  UserTextStateHolder.objectOfUserTextState
-    DisposableEffect(Unit) {
-        onDispose {
-            if (state.userMessages.isEmpty()) {
-                ShaderFlags.transitionFlag = false
-                state.hideShaderFlag.value = false
-            }
-        }
-    }
-}
-@Composable
 fun SpeakScreen(
     navController: NavController
 ){
     Shaders.currentShader = AllShaders.Ball
-    SampleScreen(
-        navController = navController,
-        BottomBox = ::SpeakBottomBox
-    )
-    ReturnBack()
+    SampleScreen(navController = navController, BottomBox = ::SpeakBottomBox)
+    BackHandler(enabled = true) {
+        ShaderFlags.transitionFlag = false
+        Handler(Looper.getMainLooper()).postDelayed({
+            navController.popBackStack()
+        }, 300)
+    }
 
 }
 
@@ -79,8 +70,15 @@ fun SpeakBottomBox(
 ){
     val state = UserTextStateHolder.objectOfUserTextState
     val keyboardController = LocalSoftwareKeyboardController.current
-    var callReturnBack by remember { mutableStateOf(false) }
+    var backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
     val padding = 3.dp
+
+    DisposableEffect(Unit) {
+        onDispose {
+            backDispatcher = null
+        }
+    }
+
     Box(modifier = modifier
         .background(color = Color.Transparent)
         .height(65.dp)
@@ -145,15 +143,8 @@ fun SpeakBottomBox(
                     tint = MaterialTheme.colorScheme.onBackground
                 )
             }
-            if(callReturnBack){
-                ReturnBack()
-                callReturnBack = false
-            }
             Button(
-                onClick = { callReturnBack = true
-                    Handler(Looper.getMainLooper()).postDelayed({
-                        navController.popBackStack()
-                    }, 300) },
+                onClick = { backDispatcher?.onBackPressed()  },
                 modifier = Modifier
                     .fillMaxHeight()
                     .size(30.dp)

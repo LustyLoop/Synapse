@@ -45,7 +45,6 @@ class UserChatMessages() : ViewModel() {
                     aiAnswer.aiAnswerHandler(userChatMessages)
                 }
                 ChatIconState.SPEAK -> {
-                    state.hideShaderFlag.value = true
                     ShaderFlags.transitionFlag = true
                     Handler(Looper.getMainLooper()).postDelayed({
                         navController.navigate(Routes.SPEAK_SCREEN)
