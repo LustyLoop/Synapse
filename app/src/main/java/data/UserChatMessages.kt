@@ -12,6 +12,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.example.synapseapp.airequests.AI
 import com.example.synapseapp.navigation.Routes
+import com.example.synapseapp.ui.theme.screens.ShaderFlags
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.UUID
@@ -45,6 +46,7 @@ class UserChatMessages() : ViewModel() {
                 }
                 ChatIconState.SPEAK -> {
                     state.hideShaderFlag.value = true
+                    ShaderFlags.transitionFlag = true
                     Handler(Looper.getMainLooper()).postDelayed({
                         navController.navigate(Routes.SPEAK_SCREEN)
                     }, 300)

@@ -18,6 +18,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.synapseapp.navigation.Routes
 import com.example.synapseapp.ui.theme.MyAppTheme
+import com.example.synapseapp.ui.theme.screens.GlobalBackground
 import com.example.synapseapp.ui.theme.screens.MainScreen
 import com.example.synapseapp.ui.theme.screens.SpeakScreen
 
@@ -45,7 +46,7 @@ class MainActivity : ComponentActivity() {
                 ) {
 
                     val navController = rememberNavController()
-
+                    GlobalBackground()
                     NavHost(
                         navController = navController,
                         startDestination = Routes.MAIN_SCREEN

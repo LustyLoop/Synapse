@@ -1,6 +1,8 @@
 package com.example.synapseapp.ui.theme.screens
 
 
+import android.os.Handler
+import android.os.Looper
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -49,9 +51,8 @@ fun ReturnBack(){
     DisposableEffect(Unit) {
         onDispose {
             if (state.userMessages.isEmpty()) {
-                Shaders.currentShader = AllShaders.Wave
+                ShaderFlags.transitionFlag = false
                 state.hideShaderFlag.value = false
-
             }
         }
     }
@@ -60,7 +61,6 @@ fun ReturnBack(){
 fun SpeakScreen(
     navController: NavController
 ){
-
     Shaders.currentShader = AllShaders.Ball
     SampleScreen(
         navController = navController,
@@ -148,11 +148,12 @@ fun SpeakBottomBox(
             if(callReturnBack){
                 ReturnBack()
                 callReturnBack = false
-
             }
             Button(
                 onClick = { callReturnBack = true
-                    navController.popBackStack()},
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        navController.popBackStack()
+                    }, 300) },
                 modifier = Modifier
                     .fillMaxHeight()
                     .size(30.dp)
