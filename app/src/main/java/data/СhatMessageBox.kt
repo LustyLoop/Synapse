@@ -19,4 +19,5 @@ data class ChatMessageBox(
     val type: IdentifyTypeMessage = IdentifyTypeMessage.NULL,
     val text: String,
     val imageSrc: Int? = null,
+    var errorFlag: Boolean = false
 ) : ViewModel()

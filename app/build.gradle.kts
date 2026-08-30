@@ -55,6 +55,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.ui)
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
@@ -76,5 +77,10 @@ dependencies {
     implementation("com.mikepenz:multiplatform-markdown-renderer-code:0.43.0")
 
     implementation("br.com.devsrsouza.compose.icons:tabler-icons:1.1.1")
+
+    implementation("androidx.graphics:graphics-core:1.0.0")
+
+    implementation("com.squareup.retrofit2:retrofit:2.11.0")
+
 }
 

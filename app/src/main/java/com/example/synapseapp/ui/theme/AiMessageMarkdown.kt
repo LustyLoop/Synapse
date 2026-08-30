@@ -19,15 +19,16 @@ import com.mikepenz.markdown.model.rememberMarkdownState
 import data.ChatMessageBox
 @Composable
 fun AiMessageMarkdown(box: ChatMessageBox){
+
     Markdown(
-        modifier = Modifier.padding(5.dp),
+        modifier = Modifier.padding(8.dp),
         markdownState = rememberMarkdownState(
             content = box.text,
             retainState = true,
             immediate = false
         ),
         colors = markdownColor(
-            text = MaterialTheme.colorScheme.onSurface,
+            text = if(box.errorFlag) Color.Red else MaterialTheme.colorScheme.onSurface,
             codeBackground = Color(0xFF2D2D2D),
             dividerColor = Color.Gray,
         ),
@@ -37,6 +38,7 @@ fun AiMessageMarkdown(box: ChatMessageBox){
             codeFence = { MarkdownHighlightedCodeFence(it.content, it.node, showHeader = true) }
         )
     )
+    //if (box.errorFlag) box.errorFlag = false
 }
 
 @Composable

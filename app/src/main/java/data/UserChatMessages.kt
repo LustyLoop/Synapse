@@ -82,7 +82,10 @@ class AiAnswerClass() : ViewModel() {
                     id = UUID.randomUUID().toString(),
                     role = IdentifyRole.AI,
                     type = IdentifyTypeMessage.TEXT,
-                    text = answer
+                    text = answer.fold(
+                        onSuccess = { it },
+                        onFailure = { error -> "Ошибка: \"${error.message}\"" }),
+                    errorFlag = answer.isFailure
                 )
             )
         }
