@@ -29,7 +29,7 @@ half4 main(float2 fragCoord)
     float2 p = uv - 0.5;
     p.x *= resolution.x / resolution.y;
 
-    float t = time * 0.6; 
+    float t = time * 0.5; 
     float rand = random(float2(1.0, 2.0));
 
     float3 background;
@@ -50,7 +50,7 @@ half4 main(float2 fragCoord)
     // ПОДГОТОВКА ВОЛНЫ
     float waveY = mix(wave, 0.0, morph) - hideAndShowProgress;
     float verticalPull = p.y * mix(1.0, 0.35, morph);
-
+    p.y = p.y - 0.05; //положение шара по y
     // ГЕОМЕТРИЯ ШАРА
     float radius = 0.16;
     float waveField = verticalPull - waveY;

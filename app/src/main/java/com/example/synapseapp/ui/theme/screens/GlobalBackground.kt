@@ -8,14 +8,10 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -25,19 +21,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PaintingStyle.Companion.Stroke
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shader
 import androidx.compose.ui.graphics.ShaderBrush
-import androidx.compose.ui.graphics.TileMode
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.vector.Path
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import com.example.synapseapp.ui.theme.screens.ShaderFlags.inDarkTheme
 import com.example.synapseapp.ui.theme.screens.ShaderFlags.transitionFlag
@@ -48,10 +35,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 import shaders.ShaderBackground
 import kotlin.random.Random
-import androidx.compose.ui.graphics.BlendMode
-import kotlin.math.cos
 import kotlin.math.sin
-import android.graphics.Bitmap
 import android.graphics.Canvas as AndroidCanvas
 import android.graphics.Paint as AndroidPaint
 import androidx.compose.ui.graphics.asAndroidPath
@@ -64,7 +48,7 @@ import androidx.core.graphics.createBitmap
 object ShaderFlags: ViewModel(){
     var time by mutableFloatStateOf(0f)
     var transitionFlag by mutableStateOf(false)
-    var inDarkTheme by mutableStateOf(0f)
+    var inDarkTheme by mutableFloatStateOf(0f)
 
 }
 
@@ -91,8 +75,8 @@ fun GlobalBackground(){
         state.hideShaderFlag.value = false
     }
     val transitionProgress by animateFloatAsState(
-        targetValue = if (transitionFlag)  1.0f else 0f,
-        animationSpec = tween(durationMillis = 2100),
+        targetValue = if (transitionFlag)  0.8f else 0f,
+        animationSpec = tween(durationMillis = 1600),
         label = "transitionProgressAnimation"
     )
     val rand = remember { Random.nextFloat() }
@@ -127,13 +111,13 @@ fun GlobalBackground(){
                 )
         )
     } else{
-        MegaBlurryBlueWave()
+        WaveBackgroundForOldDevice()
     }
 }
 
 
 @Composable
-fun MegaBlurryBlueWave(
+fun WaveBackgroundForOldDevice(
     modifier: Modifier = Modifier,
     speedMultiplier: Float = 1f
 ) {
@@ -168,7 +152,7 @@ fun MegaBlurryBlueWave(
         val softwareBitmap = createBitmap(bitmapWidth, bitmapHeight)
         val androidCanvas = AndroidCanvas(softwareBitmap)
 
-        val t = time * 0.3f
+        val t = time * 0.45f
         val baseY = bitmapHeight * 0.5f
         val step = 6f
 

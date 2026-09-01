@@ -2,7 +2,6 @@ package com.example.synapseapp.ui.theme.fargments
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -22,19 +21,21 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -47,7 +48,10 @@ import com.example.synapseapp.ui.theme.AiMessageMarkdown
 import data.AiAnswerClass
 import data.IdentifyRole
 import data.UserChatMessages
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import viewModel.GadgetInfo
+
 //@Preview(showBackground = true)
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -56,13 +60,16 @@ fun SampleScreen(
     navController: NavController,
     userChatMessages: UserChatMessages = viewModel(),
     aiAnswer: AiAnswerClass = viewModel(),
-    gadget: GadgetInfo = viewModel(),
-    BottomBox: @Composable (modifier: Modifier,
-                            navController: NavController,
-                            userChatMessages: UserChatMessages,
-                            aiAnswer: AiAnswerClass) -> Unit
+    gadget: GadgetInfo,
+    drawerState: DrawerState?,
+    BottomBox: @Composable (
+        modifier: Modifier,
+        navController: NavController,
+        userChatMessages: UserChatMessages,
+        aiAnswer: AiAnswerClass
+    ) -> Unit
 ) {
-
+    val scope = rememberCoroutineScope()
     userChatMessages.IconHandler()
     Box(
         modifier = Modifier
@@ -106,10 +113,15 @@ fun SampleScreen(
                 color = MaterialTheme.colorScheme.onBackground
             )
         }
+
         /*-----------------------------------------------------------------------------*/
         Button(
             onClick = {
-                gadget.batteryCharge += 1
+                //gadget.batteryCharge += 1
+                scope.launch {
+                    drawerState?.open()
+                }
+
             },
             modifier = Modifier
                 .align(Alignment.TopStart)
@@ -202,7 +214,7 @@ fun SampleScreen(
                             Box(
                                 modifier = Modifier
                                     .then(
-                                        if(box.errorFlag) {
+                                        if (box.errorFlag) {
                                             Modifier
                                                 .align(Alignment.BottomCenter)
                                                 .padding(top = 5.dp, start = 5.dp, end = 5.dp)
@@ -211,15 +223,15 @@ fun SampleScreen(
                                                     RoundedCornerShape(20.dp)
                                                 )
 
-                                        }else{
-                                                Modifier
-                                                    .align(Alignment.BottomStart)
-                                                    .padding(top = 5.dp, start = 0.dp, end = 5.dp)
-                                                    .background(
-                                                        color = AIMessageBackgroundColor,
-                                                        RoundedCornerShape(0.dp)
-                                                    )
-                                            }
+                                        } else {
+                                            Modifier
+                                                .align(Alignment.BottomStart)
+                                                .padding(top = 5.dp, start = 0.dp, end = 5.dp)
+                                                .background(
+                                                    color = AIMessageBackgroundColor,
+                                                    RoundedCornerShape(0.dp)
+                                                )
+                                        }
                                     )
                             ) {
                                 SelectionContainer {
@@ -227,6 +239,7 @@ fun SampleScreen(
                                 }
                             }
                         }
+
                         else -> {
                             Box(
                                 modifier = Modifier

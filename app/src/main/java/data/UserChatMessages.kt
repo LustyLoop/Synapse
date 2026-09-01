@@ -1,7 +1,5 @@
 package data
 
-import android.os.Handler
-import android.os.Looper
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -16,17 +14,19 @@ import com.example.synapseapp.ui.theme.screens.ShaderFlags
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.UUID
-import data.AiAnswerClass
+import kotlinx.coroutines.delay
 
 class UserChatMessages() : ViewModel() {
     var currentControlIcon by mutableStateOf(ChatIconState.SPEAK)
     val state = UserTextStateHolder.objectOfUserTextState
     val userAndAiMessages = mutableStateListOf<ChatMessageBox>()
 
-
-
-    fun chatHandler(aiAnswer :AiAnswerClass, userChatMessages: UserChatMessages,navController: NavController) {
-        viewModelScope.launch(Dispatchers.IO) {
+    fun chatHandler(
+        aiAnswer: AiAnswerClass,
+        userChatMessages: UserChatMessages,
+        navController: NavController
+    ) {
+        viewModelScope.launch(Dispatchers.Main) {
             when (currentControlIcon) {
                 ChatIconState.SEND -> {
                     state.hideShaderFlag.value = true
@@ -44,11 +44,11 @@ class UserChatMessages() : ViewModel() {
                     state.userText = ""
                     aiAnswer.aiAnswerHandler(userChatMessages)
                 }
+
                 ChatIconState.SPEAK -> {
                     ShaderFlags.transitionFlag = true
-                    Handler(Looper.getMainLooper()).postDelayed({
-                        navController.navigate(Routes.SPEAK_SCREEN)
-                    }, 300)
+                    delay(240)
+                    navController.navigate(Routes.SPEAK_SCREEN)
                 }
 
                 ChatIconState.STOP -> {

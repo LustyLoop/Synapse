@@ -17,9 +17,11 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -86,25 +88,31 @@ fun TextFieldBottomBox(
                 }
             )
             Spacer(modifier = Modifier.width(13.dp))
-            Button(
-                onClick = {
-                    keyboardController?.hide()
-                    userChatMessages.chatHandler(aiAnswer,userChatMessages,navController) // оптимизировать
-                },
-                modifier = Modifier
-                    .size(35.dp),
-                contentPadding = PaddingValues(0.dp),
-                colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary)
-            )
-            {
-                Icon(
-                    imageVector = userChatMessages.currentControlIcon.imageVector,
-                    contentDescription = userChatMessages.currentControlIcon.contentDescription,
+
+                Button(
+                    onClick = {
+                        keyboardController?.hide()
+                        userChatMessages.chatHandler(
+                            aiAnswer,
+                            userChatMessages,
+                            navController
+                        )
+                    },
                     modifier = Modifier
-                        .size(27.dp),
-                    tint = MaterialTheme.colorScheme.background
+                        .size(35.dp),
+                    contentPadding = PaddingValues(0.dp),
+                    colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary)
                 )
-            }
+                {
+                    Icon(
+                        imageVector = userChatMessages.currentControlIcon.imageVector,
+                        contentDescription = userChatMessages.currentControlIcon.contentDescription,
+                        modifier = Modifier
+                            .size(27.dp),
+                        tint = MaterialTheme.colorScheme.background
+                    )
+                }
+
             Spacer(modifier = Modifier.width(17.dp))
         }
     }
