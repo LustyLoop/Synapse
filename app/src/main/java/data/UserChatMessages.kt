@@ -1,5 +1,6 @@
 package data
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -15,6 +16,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.UUID
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
+import kotlin.time.Duration.Companion.milliseconds
 
 class UserChatMessages() : ViewModel() {
     var currentControlIcon by mutableStateOf(ChatIconState.SPEAK)
@@ -73,21 +76,49 @@ class AiAnswerClass() : ViewModel() {
 
 
     fun aiAnswerHandler(viewModelObj: UserChatMessages) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val state = UserTextStateHolder.objectOfUserTextState
-            val answer = AI.ai.sendMessage(state.userMessages.last())
-            viewModelObj.userAndAiMessages.add(
-                0,
-                ChatMessageBox(
-                    id = UUID.randomUUID().toString(),
-                    role = IdentifyRole.AI,
-                    type = IdentifyTypeMessage.TEXT,
-                    text = answer.fold(
-                        onSuccess = { it },
-                        onFailure = { error -> "Ошибка: \"${error.message}\"" }),
-                    errorFlag = answer.isFailure
-                )
+        viewModelScope.launch {
+
+            val messageId = UUID.randomUUID().toString()
+            var aiMessage = ChatMessageBox(
+                id = messageId,
+                role = IdentifyRole.AI,
+                type = IdentifyTypeMessage.TEXT,
+                text = "",
+                errorFlag = false
             )
+            viewModelObj.userAndAiMessages.add(0, aiMessage)
+            if (aiMessage.text.isEmpty()) {
+                launch {
+
+                }
+            }
+            val result = AI.ai.sendMessage(
+                message = UserTextStateHolder.objectOfUserTextState.userMessages.last()
+            ) { text ->
+
+                aiMessage = aiMessage.copy(text = text)
+
+                val index = viewModelObj.userAndAiMessages
+                    .indexOfFirst { it.id == messageId }
+
+                if (index != -1) {
+                    viewModelObj.userAndAiMessages[index] = aiMessage
+                }
+            }
+
+            if (result.isFailure) {
+                aiMessage = aiMessage.copy(
+                    text = "Ошибка: ${result.exceptionOrNull()?.message}",
+                    errorFlag = true
+                )
+
+                val index = viewModelObj.userAndAiMessages
+                    .indexOfFirst { it.id == messageId }
+
+                if (index != -1) {
+                    viewModelObj.userAndAiMessages[index] = aiMessage
+                }
+            }
         }
     }
 }

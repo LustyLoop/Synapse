@@ -17,6 +17,7 @@ import com.mikepenz.markdown.m3.markdownColor
 import com.mikepenz.markdown.m3.markdownTypography
 import com.mikepenz.markdown.model.rememberMarkdownState
 import data.ChatMessageBox
+
 @Composable
 fun AiMessageMarkdown(box: ChatMessageBox){
 
@@ -46,13 +47,24 @@ fun typography() = markdownTypography(
     h1 = MaterialTheme.typography.headlineLarge.copy(
         fontFamily = MaterialTheme.typography.titleLarge.fontFamily,
         fontSize = MaterialTheme.typography.titleLarge.fontSize
-
     ),
     h2 = MaterialTheme.typography.headlineMedium.copy(
         fontFamily = MaterialTheme.typography.titleMedium.fontFamily,
         fontSize = MaterialTheme.typography.titleMedium.fontSize
     ),
     h3 = MaterialTheme.typography.headlineMedium.copy(
+        fontFamily = MaterialTheme.typography.titleSmall.fontFamily,
+        fontSize = MaterialTheme.typography.titleSmall.fontSize
+    ),
+    h4 = MaterialTheme.typography.headlineSmall.copy(
+        fontFamily = MaterialTheme.typography.titleSmall.fontFamily,
+        fontSize = MaterialTheme.typography.titleSmall.fontSize
+    ),
+    h5 = MaterialTheme.typography.headlineSmall.copy(
+        fontFamily = MaterialTheme.typography.titleSmall.fontFamily,
+        fontSize = MaterialTheme.typography.titleSmall.fontSize
+    ),
+    h6 = MaterialTheme.typography.headlineSmall.copy(
         fontFamily = MaterialTheme.typography.titleSmall.fontFamily,
         fontSize = MaterialTheme.typography.titleSmall.fontSize
     ),

@@ -55,7 +55,7 @@ This Android app is a universal chat client for communicating with artificial in
 
 ## Current status:
 ⚠️ Please note: the project is under active development. Many planned features have not yet been implemented, and the application may not function fully. Use with caution and be prepared for significant changes.
-## Acknowledgments
+## Special Thanks
 
 This application uses the following open-source libraries:
 

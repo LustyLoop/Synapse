@@ -32,16 +32,16 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.synapseapp.ui.theme.fargments.SampleScreen
-import compose.icons.TablerIcons
-import compose.icons.tablericons.Microphone
-import compose.icons.tablericons.MicrophoneOff
-import compose.icons.tablericons.Video
-import compose.icons.tablericons.X
 import data.AiAnswerClass
 import data.AllShaders
 import data.Shaders
 import data.UserChatMessages
 import data.UserTextStateHolder
+import dev.seyfarth.tablericons.TablerIcons
+import dev.seyfarth.tablericons.outlined.Microphone
+import dev.seyfarth.tablericons.outlined.MicrophoneOff
+import dev.seyfarth.tablericons.outlined.Video
+import dev.seyfarth.tablericons.outlined.X
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import viewModel.GadgetInfo
@@ -111,7 +111,7 @@ fun SpeakBottomBox(
                 colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.surface)
             ) {
                 Icon(
-                    imageVector = TablerIcons.Video,
+                    imageVector = TablerIcons.Outlined.Video,
                     contentDescription = "Меню",
                     tint = MaterialTheme.colorScheme.onBackground
                 )
@@ -135,12 +135,12 @@ fun SpeakBottomBox(
                     tint = MaterialTheme.colorScheme.onBackground
                 )
             }
-            var currentMicIcon by remember { mutableStateOf(TablerIcons.Microphone) }
+            var currentMicIcon by remember { mutableStateOf(TablerIcons.Outlined.Microphone) }
             Button(
                 onClick = {
                     currentMicIcon =
-                        if (currentMicIcon == TablerIcons.Microphone) TablerIcons.MicrophoneOff
-                        else TablerIcons.Microphone
+                        if (currentMicIcon == TablerIcons.Outlined.Microphone) TablerIcons.Outlined.MicrophoneOff
+                        else TablerIcons.Outlined.Microphone
                 },
                 modifier = Modifier
                     .fillMaxHeight()
@@ -173,7 +173,7 @@ fun SpeakBottomBox(
                 colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.surface)
             ) {
                 Icon(
-                    imageVector = TablerIcons.X,
+                    imageVector = TablerIcons.Outlined.X,
                     contentDescription = "Меню",
                     tint = MaterialTheme.colorScheme.onBackground
                 )

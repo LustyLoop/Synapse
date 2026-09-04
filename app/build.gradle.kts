@@ -77,7 +77,7 @@ dependencies {
     implementation("com.mikepenz:multiplatform-markdown-renderer-m3:0.43.0")
     implementation("com.mikepenz:multiplatform-markdown-renderer-code:0.43.0")
 
-    implementation("br.com.devsrsouza.compose.icons:tabler-icons:1.1.1")
+    implementation("dev.seyfarth:tabler-icons-kmp:1.0.0")
 
     implementation("androidx.graphics:graphics-core:1.0.0")
 

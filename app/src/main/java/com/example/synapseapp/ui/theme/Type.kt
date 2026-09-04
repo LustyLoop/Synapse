@@ -20,7 +20,6 @@ val CustomTypography = Typography(
         fontFamily = ManropeFamily,
         fontWeight = FontWeight.Bold,
         fontSize = 22.sp,
-
         ),
     titleMedium = TextStyle(
         fontFamily = ManropeFamily,
@@ -31,7 +30,6 @@ val CustomTypography = Typography(
         fontFamily = ManropeFamily,
         fontWeight = FontWeight.Bold,
         fontSize = 14.sp,
-
         ),
 
     bodyLarge = TextStyle(

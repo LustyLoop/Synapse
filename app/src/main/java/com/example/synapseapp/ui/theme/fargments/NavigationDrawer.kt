@@ -13,33 +13,33 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.Help
-import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.synapseapp.R
-import compose.icons.TablerIcons
-import compose.icons.tablericons.Photo
-import compose.icons.tablericons.X
+import dev.seyfarth.tablericons.TablerIcons
+import dev.seyfarth.tablericons.outlined.LibraryPhoto
+import dev.seyfarth.tablericons.outlined.MessageCirclePlus
+import dev.seyfarth.tablericons.outlined.Settings
+import dev.seyfarth.tablericons.outlined.X
 import kotlinx.coroutines.launch
 import viewModel.GadgetInfo
 
@@ -61,18 +61,19 @@ fun NavigationDrawer(
     }
 
     ModalNavigationDrawer(
+        modifier = Modifier.padding(start = 0.dp),
         scrimColor = MaterialTheme.colorScheme.background.copy(alpha = 0.4f),
         drawerContent = {
             ModalDrawerSheet(
                 drawerContainerColor = MaterialTheme.colorScheme.background,
                 drawerContentColor = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.width(300.dp)
             ) {
                 Column(
                     modifier = Modifier
                         .padding(
-                            start = 12.dp,
-                            end = 12.dp,
+                            start = 5.dp,
+                            end = 5.dp,
                             top = 16.dp,
                             bottom = 16.dp
                         )
@@ -107,104 +108,56 @@ fun NavigationDrawer(
                         )
                         {
                             Icon(
-                                imageVector = TablerIcons.X,
+                                imageVector = TablerIcons.Outlined.X,
                                 contentDescription = "Закрыть меню",
-                                tint = Color.White
+                                tint = MaterialTheme.colorScheme.onBackground
                             )
                         }
                     }
-                    //Spacer(Modifier.height(12.dp))
-                    NavigationDrawerItem(
-                        label = {
-                            Text(
-                                modifier = Modifier
-                                    .padding(start = 4.dp),
-                                text = "Settings"
-                            )
-                        },
-                        selected = false,
-                        icon = {
-                            Icon(
-                                modifier = Modifier
-                                    .padding(start = 4.dp),
-                                imageVector = Icons.Outlined.Settings,
-                                contentDescription = null
-                            )
-                        },
-                        onClick = { /* Handle click */ }
+                    ShowNavigationDrawerItem(
+                        labelText = "Новый чат",
+                        iconId = TablerIcons.Outlined.MessageCirclePlus,
+                        textStartPaddingValue = 6.dp
                     )
-                    NavigationDrawerItem(
-                        label = { Text("Gallery") },
-                        selected = false,
-                        icon = {
-                            Image(
-                                modifier = Modifier
-                                    .size(32.dp)
-                                    .padding(top = 4.dp),
-                                painter = painterResource(R.drawable.glasses_camera_ic),
-                                contentDescription = null,
-                                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onBackground)
-                            )
-                        },
-                        onClick = { /* Handle click */ }
+                    ShowNavigationDrawerItem(
+                        labelText = "Камера",
+                        imageId = R.drawable.glasses_camera_ic,
+                        textStartPaddingValue = 4.dp
                     )
-                    NavigationDrawerItem(
-                        label = {
-                            Text(
-                                modifier = Modifier
-                                    .padding(start = 4.dp),
-                                text = "Camera"
-                            )
-                        },
-                        selected = false,
-                        icon = {
-                            Icon(
-                                modifier = Modifier
-                                    .padding(start = 4.dp),
-                                imageVector = TablerIcons.Photo, contentDescription = null
-                            )
-                        },
-                        badge = { Text("20") },
-                        onClick = { }
+                    ShowNavigationDrawerItem(
+                        labelText = "Галерея",
+                        iconId = TablerIcons.Outlined.LibraryPhoto,
+                        badgeText = "20",
+                        textStartPaddingValue = 6.dp
                     )
-                    NavigationDrawerItem(
-                        label = {
-                            Text(
-                                modifier = Modifier
-                                    .padding(start = 4.dp),
-                                text = "Help and feedback"
-                            )
-                        },
-                        selected = false,
-                        icon = {
-                            Icon(
-                                modifier = Modifier
-                                    .padding(start = 4.dp),
-                                imageVector = Icons.AutoMirrored.Outlined.Help,
-                                contentDescription = null
-                            )
-                        },
-                        onClick = { },
+                    ShowNavigationDrawerItem(
+                        labelText = "Настройки",
+                        iconId = TablerIcons.Outlined.Settings,
+                        textStartPaddingValue = 6.dp
                     )
-
-                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-
+                    Spacer(Modifier.height(10.dp))
                     Text(
-                        "Section 2",
-                        modifier = Modifier.padding(16.dp),
+                        "История чатов",
+                        modifier = Modifier.padding(start = 20.dp),
                         style = MaterialTheme.typography.titleMedium
                     )
-                    NavigationDrawerItem(
-                        label = { Text("Item 1") },
-                        selected = false,
-                        onClick = { /* Handle click */ }
-                    )
-                    NavigationDrawerItem(
-                        label = { Text("Item 2") },
-                        selected = false,
-                        onClick = { /* Handle click */ }
-                    )
-                    Spacer(Modifier.height(12.dp))
+                    Spacer(Modifier.height(6.dp))
+                    menuItems.forEach { item ->
+                        NavigationDrawerItem(
+                            modifier = Modifier.height(45.dp),
+                            label = { Text(
+                                modifier = Modifier.padding(start = 4.dp),
+                                text =
+                                    if(item.title.length > 26)item.title.substring(0, 26).dropLast(1) + "…"
+                                    else item.title,
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onBackground
+                            ) },
+                            selected = false,
+                            onClick = {}
+                        )
+                    }
+
                 }
             }
         },
@@ -215,13 +168,80 @@ fun NavigationDrawer(
             gadget,
             drawerState
         )
-//        scope.launch {
-//            if (drawerState.isClosed) {
-//                drawerState.open()
-//            } else {
-//                drawerState.close()
-//            }
-//        }
-
     }
 }
+
+@Composable
+fun ShowNavigationDrawerItem(
+    labelText: String,
+    imageId: Int = 0,
+    iconId: ImageVector? = null,
+    badgeText: String? = null,
+    textStartPaddingValue: Dp = 0.dp,
+    onClick: () -> Unit = {}
+) {
+    NavigationDrawerItem(
+        modifier = Modifier.padding(horizontal = 0.dp),
+        label = {
+            Text(
+                text = labelText,
+                modifier = Modifier.padding(start = textStartPaddingValue)
+            )
+        },
+        selected = false,
+        icon = {
+            if (imageId != 0) {
+                Image(
+                    modifier = Modifier
+                        .size(32.dp)
+                        .padding(top = 4.dp),
+                    painter = painterResource(imageId),
+                    contentDescription = null,
+                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onBackground)
+                )
+            } else 0
+            if (iconId != null) {
+                Icon(
+                    modifier = Modifier
+                        .size(30.dp)
+                        .padding(start = 3.dp),
+                    imageVector = iconId,
+                    contentDescription = null
+                )
+            }
+            else null
+        },
+        badge = { Text(badgeText ?: "") },
+        colors = NavigationDrawerItemDefaults.colors(
+            unselectedIconColor = MaterialTheme.colorScheme.onBackground,
+            unselectedTextColor = MaterialTheme.colorScheme.onBackground,
+            unselectedBadgeColor = MaterialTheme.colorScheme.onBackground
+        ),
+        onClick = onClick
+    )
+}
+data class DrawerItemsOfChats(
+    val title: String
+)
+
+
+val menuItems = listOf(
+    DrawerItemsOfChats("Как можно вырасти на 6 смvvvv?"),
+    DrawerItemsOfChats("Профиль"),
+    DrawerItemsOfChats("Настройки"),
+    DrawerItemsOfChats("Настройки"),
+    DrawerItemsOfChats("Настройки"),
+    DrawerItemsOfChats("Настройки"),
+    DrawerItemsOfChats("Настройки"),
+    DrawerItemsOfChats("Настройки"),
+    DrawerItemsOfChats("Настройки"),
+    DrawerItemsOfChats("Настройки"),
+    DrawerItemsOfChats("Настройки"),
+    DrawerItemsOfChats("Настройки"),
+    DrawerItemsOfChats("Настройки"),
+    DrawerItemsOfChats("Настройки"),
+    DrawerItemsOfChats("Настройки"),
+    DrawerItemsOfChats("Настройки"),
+    DrawerItemsOfChats("Настройки"),
+    DrawerItemsOfChats("Настройки")
+)

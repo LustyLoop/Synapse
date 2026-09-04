@@ -75,8 +75,8 @@ fun GlobalBackground(){
         state.hideShaderFlag.value = false
     }
     val transitionProgress by animateFloatAsState(
-        targetValue = if (transitionFlag)  0.8f else 0f,
-        animationSpec = tween(durationMillis = 1600),
+        targetValue = if (transitionFlag)  1.0f else 0f,
+        animationSpec = tween(durationMillis = 1800),
         label = "transitionProgressAnimation"
     )
     val rand = remember { Random.nextFloat() }

@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Button
@@ -26,7 +27,14 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -214,8 +222,7 @@ fun SampleScreen(
                                                 .align(Alignment.BottomCenter)
                                                 .padding(top = 5.dp, start = 5.dp, end = 5.dp)
                                                 .background(
-                                                    color = MaterialTheme.colorScheme.surfaceVariant,
-                                                    RoundedCornerShape(20.dp)
+                                                    color = Color.Transparent
                                                 )
 
                                         } else {
@@ -277,7 +284,7 @@ fun SampleScreen(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
-                .height(120.dp)
+                .height(110.dp)
                 .zIndex(-1f)
                 .background(
                     Brush.verticalGradient(
