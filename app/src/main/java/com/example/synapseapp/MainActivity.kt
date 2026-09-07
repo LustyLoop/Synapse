@@ -1,22 +1,20 @@
 package com.example.synapseapp
 
 
-
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.rememberDrawerState
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
+import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -26,7 +24,6 @@ import com.example.synapseapp.ui.theme.fargments.NavigationDrawer
 import com.example.synapseapp.ui.theme.screens.GlobalBackground
 import com.example.synapseapp.ui.theme.screens.MainScreen
 import com.example.synapseapp.ui.theme.screens.SpeakScreen
-import viewModel.GadgetInfo
 
 
 class MainActivity : ComponentActivity() {
@@ -35,6 +32,7 @@ class MainActivity : ComponentActivity() {
         (application as MyApp).gadgetInfo
     }
 
+    @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge(
@@ -45,7 +43,8 @@ class MainActivity : ComponentActivity() {
         )
 
         setContent {
-
+            val windowSizeClass = calculateWindowSizeClass(this)
+            val isWideScreen = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
             MyAppTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -61,15 +60,16 @@ class MainActivity : ComponentActivity() {
                         composable(route = Routes.MAIN_SCREEN) {
                             NavigationDrawer(
                                 ::MainScreen,
-                                    navController = navController,
-                                    gadget = gadget
-
+                                navController = navController,
+                                gadget = gadget,
+                                isWideScreen
                             )
                         }
                         composable(route = Routes.SPEAK_SCREEN) {
                             SpeakScreen(
                                 navController = navController,
-                                gadget = gadget
+                                gadget = gadget,
+                                wideScreenFlag = isWideScreen
                             )
                         }
                     }

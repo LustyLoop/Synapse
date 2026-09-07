@@ -11,10 +11,6 @@ uniform float transitionProgress;
 uniform float inDarkTheme;
 uniform float hideAndShowProgress;
 
-float random(float2 p)
-{
-    return fract(sin(dot(p, float2(12.9898, 78.233))) * 43758.5453);
-}
 
 float blob(float2 p, float2 c, float size)
 {
@@ -30,7 +26,6 @@ half4 main(float2 fragCoord)
     p.x *= resolution.x / resolution.y;
 
     float t = time * 0.5; 
-    float rand = random(float2(1.0, 2.0));
 
     float3 background;
     

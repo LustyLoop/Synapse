@@ -57,6 +57,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.ui)
+    implementation(libs.androidx.window)
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
@@ -83,5 +84,6 @@ dependencies {
 
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
 
+    implementation("androidx.compose.material3:material3-window-size-class")
 }
 

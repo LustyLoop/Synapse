@@ -15,13 +15,15 @@ import viewModel.GadgetInfo
 fun MainScreen(
     navController: NavController,
     gadget: GadgetInfo,
-    drawerState: DrawerState
+    drawerState: DrawerState,
+    wideScreenFlag: Boolean
 ) {
     Shaders.currentShader = AllShaders.Wave
     SampleScreen(
         navController = navController,
         BottomBox = ::TextFieldBottomBox,
         gadget = gadget,
-        drawerState = drawerState
+        drawerState = drawerState,
+        wideScreenFlag = wideScreenFlag
     )
 }

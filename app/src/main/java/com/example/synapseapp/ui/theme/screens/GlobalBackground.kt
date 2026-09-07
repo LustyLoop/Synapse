@@ -44,12 +44,34 @@ import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import android.graphics.BlurMaskFilter
 import androidx.core.graphics.createBitmap
+import kotlin.time.Duration.Companion.milliseconds
 
 object ShaderFlags: ViewModel(){
     var time by mutableFloatStateOf(0f)
     var transitionFlag by mutableStateOf(false)
     var inDarkTheme by mutableFloatStateOf(0f)
 
+}
+
+@Composable
+fun RandomAnimation(): Float {
+    val min = 0.0f
+    val max = 1.0f
+    var target by remember { mutableFloatStateOf(Random.nextFloat() * (0.7f - 0.0f) + 0.0f) }
+
+    val rand by animateFloatAsState(
+        targetValue = target,
+        animationSpec = tween(600000),
+        label = "random"
+    )
+
+    LaunchedEffect(Unit) {
+        while (true) {
+            target = Random.nextFloat() * (max - min) + min
+            delay(16.milliseconds)
+        }
+    }
+    return rand
 }
 
 @Composable
@@ -61,10 +83,11 @@ fun GlobalBackground(){
             while (isActive) {
                 val currentNanos = System.nanoTime()
                 ShaderFlags.time = (currentNanos - startNanos) / 1_000_000_000f
-                delay(10)
+                delay(16)
             }
         }
     }
+
     val state = UserTextStateHolder.objectOfUserTextState
     val hideAndShowProgress by animateFloatAsState(
         targetValue = if (state.hideShaderFlag.value) 1.0f else 0f,
@@ -79,38 +102,48 @@ fun GlobalBackground(){
         animationSpec = tween(durationMillis = 1800),
         label = "transitionProgressAnimation"
     )
-    val rand = remember { Random.nextFloat() }
+
+//    val rand = remember { Random.nextFloat() }
+
     val shaderBackground = remember { ShaderBackground }
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        val isShaderVisible = hideAndShowProgress < 1.0f
+        val isTransitioning = transitionProgress > 0f && transitionProgress < 1.0f
+        val isAnimationActive = isShaderVisible || isTransitioning || transitionFlag
+        val rand = RandomAnimation()
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .statusBarsPadding()
                 .then(
-                        Modifier.drawWithCache {
-                            shaderBackground?.setFloatUniform(
-                                "resolution",
-                                size.width,
-                                size.height
-                            )
-                            shaderBackground?.setFloatUniform("rand", rand)
-                            shaderBackground?.setFloatUniform(
-                                "transitionProgress",
-                                transitionProgress
-                            )
-                            shaderBackground?.setFloatUniform("inDarkTheme", inDarkTheme)
-                            shaderBackground?.setFloatUniform(
-                                "hideAndShowProgress",
-                                hideAndShowProgress
-                            )
-                            onDrawBehind {
+                    Modifier.drawWithCache {
+                        onDrawBehind {
+                            if (isAnimationActive) {
+
+                                shaderBackground?.setFloatUniform(
+                                    "resolution",
+                                    size.width,
+                                    size.height
+                                )
+                                shaderBackground?.setFloatUniform("rand", rand)
+                                shaderBackground?.setFloatUniform(
+                                    "transitionProgress",
+                                    transitionProgress
+                                )
+                                shaderBackground?.setFloatUniform("inDarkTheme", inDarkTheme)
+                                shaderBackground?.setFloatUniform(
+                                    "hideAndShowProgress",
+                                    hideAndShowProgress
+                                )
                                 shaderBackground?.setFloatUniform("time", ShaderFlags.time)
+
                                 drawRect(brush = ShaderBrush(shaderBackground as Shader))
                             }
                         }
+                    }
                 )
         )
-    } else{
+    } else {
         WaveBackgroundForOldDevice()
     }
 }

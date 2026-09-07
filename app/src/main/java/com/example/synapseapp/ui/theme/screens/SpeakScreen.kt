@@ -16,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DrawerState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -49,7 +50,8 @@ import viewModel.GadgetInfo
 @Composable
 fun SpeakScreen(
     navController: NavController,
-    gadget: GadgetInfo
+    gadget: GadgetInfo,
+    wideScreenFlag: Boolean
 ) {
     val scope = rememberCoroutineScope()
     Shaders.currentShader = AllShaders.Ball
@@ -57,7 +59,8 @@ fun SpeakScreen(
         navController = navController,
         BottomBox = ::SpeakBottomBox,
         gadget = gadget,
-        drawerState = null
+        drawerState = null,
+        wideScreenFlag =  wideScreenFlag
     )
     BackHandler(enabled = true) {
         ShaderFlags.transitionFlag = false
@@ -75,7 +78,9 @@ fun SpeakBottomBox(
     modifier: Modifier,
     navController: NavController,
     userChatMessages: UserChatMessages,
-    aiAnswer: AiAnswerClass
+    aiAnswer: AiAnswerClass,
+    drawerState: DrawerState?,
+    wideScreenFlag: Boolean
 ) {
     val state = UserTextStateHolder.objectOfUserTextState
     val keyboardController = LocalSoftwareKeyboardController.current

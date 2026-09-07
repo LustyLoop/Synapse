@@ -1,6 +1,8 @@
 package data
 
 import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 
 enum class IdentifyRole(){
     USER,
@@ -19,5 +21,6 @@ data class ChatMessageBox(
     val type: IdentifyTypeMessage = IdentifyTypeMessage.NULL,
     val text: String,
     val imageSrc: Int? = null,
-    var errorFlag: Boolean = false
+    var errorFlag: Boolean = false,
+    val response: Flow<String> = emptyFlow()
 ) : ViewModel()

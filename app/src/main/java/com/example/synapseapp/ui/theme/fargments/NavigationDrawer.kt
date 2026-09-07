@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.DismissibleDrawerSheet
+import androidx.compose.material3.DismissibleNavigationDrawer
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -26,6 +28,7 @@ import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
@@ -40,136 +43,189 @@ import dev.seyfarth.tablericons.outlined.LibraryPhoto
 import dev.seyfarth.tablericons.outlined.MessageCirclePlus
 import dev.seyfarth.tablericons.outlined.Settings
 import dev.seyfarth.tablericons.outlined.X
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import viewModel.GadgetInfo
+
+
+@Composable
+fun SampleOfNavigationDrawer(
+    scope: CoroutineScope,
+    drawerState: DrawerState
+) {
+    Column(
+        modifier = Modifier
+            .padding(
+                start = 5.dp,
+                end = 5.dp,
+                top = 16.dp,
+                bottom = 16.dp
+            )
+            .verticalScroll(rememberScrollState())
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(60.dp)
+        ) {
+            Text(
+                "Synapse",
+                modifier = Modifier
+                    .padding(
+                        start = 12.dp,
+                        end = 12.dp,
+                        top = 8.dp,
+                        bottom = 12.dp
+                    )
+                    .weight(1f),
+                style = MaterialTheme.typography.titleLarge
+            )
+            IconButton(
+                onClick = {
+                    scope.launch {
+                        drawerState.close()
+                    }
+                },
+                modifier = Modifier
+                    //.padding(top = 8.dp)
+                    .size(48.dp)
+            )
+            {
+                Icon(
+                    imageVector = TablerIcons.Outlined.X,
+                    contentDescription = "Закрыть меню",
+                    tint = MaterialTheme.colorScheme.onBackground
+                )
+
+            }
+        }
+        ShowNavigationDrawerItem(
+            labelText = "Новый чат",
+            iconId = TablerIcons.Outlined.MessageCirclePlus,
+            textStartPaddingValue = 6.dp
+        )
+        ShowNavigationDrawerItem(
+            labelText = "Камера",
+            imageId = R.drawable.glasses_camera_ic,
+            textStartPaddingValue = 4.dp
+        )
+        ShowNavigationDrawerItem(
+            labelText = "Галерея",
+            iconId = TablerIcons.Outlined.LibraryPhoto,
+            badgeText = "20",
+            textStartPaddingValue = 6.dp
+        )
+        ShowNavigationDrawerItem(
+            labelText = "Настройки",
+            iconId = TablerIcons.Outlined.Settings,
+            textStartPaddingValue = 6.dp
+        )
+        Spacer(Modifier.height(10.dp))
+        Text(
+            "История чатов",
+            modifier = Modifier.padding(start = 20.dp),
+            style = MaterialTheme.typography.titleMedium
+        )
+        Spacer(Modifier.height(6.dp))
+        menuItems.forEach { item ->
+            NavigationDrawerItem(
+                modifier = Modifier.height(45.dp),
+                label = {
+                    Text(
+                        modifier = Modifier.padding(start = 4.dp),
+                        text =
+                            if (item.title.length > 26) item.title.substring(0, 26)
+                                .dropLast(1) + "…"
+                            else item.title,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                },
+                selected = false,
+                onClick = {}
+            )
+        }
+
+    }
+}
+
 
 @SuppressLint("CoroutineCreationDuringComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NavigationDrawer(
-    localMainScreen: @Composable (NavController, GadgetInfo, DrawerState) -> Unit,
+    localMainScreen: @Composable (NavController, GadgetInfo, DrawerState, Boolean) -> Unit,
     navController: NavController,
-    gadget: GadgetInfo
+    gadget: GadgetInfo,
+    wideScreenFlag: Boolean
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
-    BackHandler(enabled = drawerState.isOpen) {
-        scope.launch {
-            drawerState.close()
+    if(wideScreenFlag){
+        DismissibleNavigationDrawer(
+            modifier = Modifier.padding(start = 0.dp),
+            drawerContent = {
+                DismissibleDrawerSheet(
+                    drawerContainerColor = MaterialTheme.colorScheme.background,
+                    drawerContentColor = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier.width(300.dp)
+                ) {
+                    SampleOfNavigationDrawer(
+                        scope,
+                        drawerState
+                    )
+                }
+            },
+            drawerState = drawerState
+        ) {
+            localMainScreen(
+                navController,
+                gadget,
+                drawerState,
+                wideScreenFlag
+            )
+        }
+        BackHandler(enabled = drawerState.isOpen) {
+            scope.launch {
+                drawerState.close()
+            }
         }
     }
-
-    ModalNavigationDrawer(
-        modifier = Modifier.padding(start = 0.dp),
-        scrimColor = MaterialTheme.colorScheme.background.copy(alpha = 0.4f),
-        drawerContent = {
-            ModalDrawerSheet(
-                drawerContainerColor = MaterialTheme.colorScheme.background,
-                drawerContentColor = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.width(300.dp)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .padding(
-                            start = 5.dp,
-                            end = 5.dp,
-                            top = 16.dp,
-                            bottom = 16.dp
-                        )
-                        .verticalScroll(rememberScrollState())
+    else {
+        ModalNavigationDrawer(
+            modifier = Modifier.padding(start = 0.dp),
+            scrimColor = MaterialTheme.colorScheme.background.copy(alpha = 0.4f),
+            drawerContent = {
+                ModalDrawerSheet(
+                    drawerContainerColor = MaterialTheme.colorScheme.background,
+                    drawerContentColor = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier.width(300.dp)
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(60.dp)
-                    ) {
-                        Text(
-                            "Synapse",
-                            modifier = Modifier
-                                .padding(
-                                    start = 12.dp,
-                                    end = 12.dp,
-                                    top = 8.dp,
-                                    bottom = 12.dp
-                                )
-                                .weight(1f),
-                            style = MaterialTheme.typography.titleLarge
-                        )
-                        IconButton(
-                            onClick = {
-                                scope.launch {
-                                    drawerState.close()
-                                }
-                            },
-                            modifier = Modifier
-                                //.padding(top = 8.dp)
-                                .size(48.dp)
-                        )
-                        {
-                            Icon(
-                                imageVector = TablerIcons.Outlined.X,
-                                contentDescription = "Закрыть меню",
-                                tint = MaterialTheme.colorScheme.onBackground
-                            )
-                        }
-                    }
-                    ShowNavigationDrawerItem(
-                        labelText = "Новый чат",
-                        iconId = TablerIcons.Outlined.MessageCirclePlus,
-                        textStartPaddingValue = 6.dp
+                    SampleOfNavigationDrawer(
+                        scope,
+                        drawerState
                     )
-                    ShowNavigationDrawerItem(
-                        labelText = "Камера",
-                        imageId = R.drawable.glasses_camera_ic,
-                        textStartPaddingValue = 4.dp
-                    )
-                    ShowNavigationDrawerItem(
-                        labelText = "Галерея",
-                        iconId = TablerIcons.Outlined.LibraryPhoto,
-                        badgeText = "20",
-                        textStartPaddingValue = 6.dp
-                    )
-                    ShowNavigationDrawerItem(
-                        labelText = "Настройки",
-                        iconId = TablerIcons.Outlined.Settings,
-                        textStartPaddingValue = 6.dp
-                    )
-                    Spacer(Modifier.height(10.dp))
-                    Text(
-                        "История чатов",
-                        modifier = Modifier.padding(start = 20.dp),
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    Spacer(Modifier.height(6.dp))
-                    menuItems.forEach { item ->
-                        NavigationDrawerItem(
-                            modifier = Modifier.height(45.dp),
-                            label = { Text(
-                                modifier = Modifier.padding(start = 4.dp),
-                                text =
-                                    if(item.title.length > 26)item.title.substring(0, 26).dropLast(1) + "…"
-                                    else item.title,
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onBackground
-                            ) },
-                            selected = false,
-                            onClick = {}
-                        )
-                    }
-
                 }
+            },
+            drawerState = drawerState
+        ) {
+            localMainScreen(
+                navController,
+                gadget,
+                drawerState,
+                wideScreenFlag
+            )
+        }
+
+        BackHandler(enabled = drawerState.isOpen) {
+            scope.launch {
+                drawerState.close()
             }
-        },
-        drawerState = drawerState
-    ) {
-        localMainScreen(
-            navController,
-            gadget,
-            drawerState
-        )
+        }
     }
 }
+
 
 @Composable
 fun ShowNavigationDrawerItem(
@@ -208,8 +264,7 @@ fun ShowNavigationDrawerItem(
                     imageVector = iconId,
                     contentDescription = null
                 )
-            }
-            else null
+            } else null
         },
         badge = { Text(badgeText ?: "") },
         colors = NavigationDrawerItemDefaults.colors(
@@ -220,6 +275,7 @@ fun ShowNavigationDrawerItem(
         onClick = onClick
     )
 }
+
 data class DrawerItemsOfChats(
     val title: String
 )

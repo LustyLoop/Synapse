@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Button
@@ -27,14 +26,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
-import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -55,6 +47,7 @@ import data.UserChatMessages
 import kotlinx.coroutines.launch
 import viewModel.GadgetInfo
 
+
 //@Preview(showBackground = true)
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -65,11 +58,14 @@ fun SampleScreen(
     aiAnswer: AiAnswerClass = viewModel(),
     gadget: GadgetInfo,
     drawerState: DrawerState?,
+    wideScreenFlag: Boolean,
     BottomBox: @Composable (
         modifier: Modifier,
         navController: NavController,
         userChatMessages: UserChatMessages,
-        aiAnswer: AiAnswerClass
+        aiAnswer: AiAnswerClass,
+        drawerState: DrawerState?,
+        wideScreenFlag: Boolean
     ) -> Unit
 ) {
     val scope = rememberCoroutineScope()
@@ -267,18 +263,19 @@ fun SampleScreen(
         }
         BottomBox(
             Modifier
-                .align(Alignment.BottomCenter)
+                .align(Alignment.BottomStart)
                 .navigationBarsPadding()
                 .imePadding()
-                .fillMaxWidth()
                 .padding(
-                    bottom = 10.dp,
                     start = 20.dp,
-                    end = 20.dp
+                    end = 20.dp,
+                    bottom = 10.dp
                 ),
             navController,
             userChatMessages,
-            aiAnswer
+            aiAnswer,
+            drawerState,
+            wideScreenFlag
         )
         Box(
             modifier = Modifier
