@@ -53,26 +53,6 @@ object ShaderFlags: ViewModel(){
 
 }
 
-@Composable
-fun RandomAnimation(): Float {
-    val min = 0.0f
-    val max = 1.0f
-    var target by remember { mutableFloatStateOf(Random.nextFloat() * (0.7f - 0.0f) + 0.0f) }
-
-    val rand by animateFloatAsState(
-        targetValue = target,
-        animationSpec = tween(600000),
-        label = "random"
-    )
-
-    LaunchedEffect(Unit) {
-        while (true) {
-            target = Random.nextFloat() * (max - min) + min
-            delay(16.milliseconds)
-        }
-    }
-    return rand
-}
 
 @Composable
 fun GlobalBackground(){
@@ -103,14 +83,14 @@ fun GlobalBackground(){
         label = "transitionProgressAnimation"
     )
 
-//    val rand = remember { Random.nextFloat() }
+    val rand = remember { Random.nextFloat() * (1.0f - 0.0f) + 0.0f }
 
     val shaderBackground = remember { ShaderBackground }
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         val isShaderVisible = hideAndShowProgress < 1.0f
         val isTransitioning = transitionProgress > 0f && transitionProgress < 1.0f
         val isAnimationActive = isShaderVisible || isTransitioning || transitionFlag
-        val rand = RandomAnimation()
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -233,7 +213,6 @@ fun WaveBackgroundForOldDevice(
         }
         androidCanvas.drawPath(wavePath.asAndroidPath(), paint)
 
-        // Рисуем на основном Canvas с аппаратным сглаживанием
         drawIntoCanvas { canvas ->
             canvas.nativeCanvas.drawBitmap(
                 softwareBitmap,

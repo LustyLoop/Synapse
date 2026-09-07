@@ -134,7 +134,7 @@ fun SampleOfNavigationDrawer(
                     Text(
                         modifier = Modifier.padding(start = 4.dp),
                         text =
-                            if (item.title.length > 26) item.title.substring(0, 26)
+                            if (item.title.length > 24) item.title.substring(0, 24)
                                 .dropLast(1) + "…"
                             else item.title,
                         style = MaterialTheme.typography.bodyLarge,
@@ -282,22 +282,24 @@ data class DrawerItemsOfChats(
 
 
 val menuItems = listOf(
-    DrawerItemsOfChats("Как можно вырасти на 6 смvvvv?"),
-    DrawerItemsOfChats("Профиль"),
-    DrawerItemsOfChats("Настройки"),
-    DrawerItemsOfChats("Настройки"),
-    DrawerItemsOfChats("Настройки"),
-    DrawerItemsOfChats("Настройки"),
-    DrawerItemsOfChats("Настройки"),
-    DrawerItemsOfChats("Настройки"),
-    DrawerItemsOfChats("Настройки"),
-    DrawerItemsOfChats("Настройки"),
-    DrawerItemsOfChats("Настройки"),
-    DrawerItemsOfChats("Настройки"),
-    DrawerItemsOfChats("Настройки"),
-    DrawerItemsOfChats("Настройки"),
-    DrawerItemsOfChats("Настройки"),
-    DrawerItemsOfChats("Настройки"),
-    DrawerItemsOfChats("Настройки"),
-    DrawerItemsOfChats("Настройки")
+    DrawerItemsOfChats("Как приготовить вкусный завтрак?"),
+    DrawerItemsOfChats("Как быстро убрать пятно с одежды?"),
+    DrawerItemsOfChats("Как правильно хранить продукты в холодильнике?"),
+    DrawerItemsOfChats("Как избавиться от неприятного запаха в комнате?"),
+    DrawerItemsOfChats("Как выбрать хороший матрас для сна?"),
+    DrawerItemsOfChats("Как быстро высушить одежду дома?"),
+    DrawerItemsOfChats("Как почистить клавиатуру компьютера?"),
+    DrawerItemsOfChats("Как организовать рабочее место дома?"),
+    DrawerItemsOfChats("Как сэкономить на коммунальных расходах?"),
+    DrawerItemsOfChats("Как убрать пыль надолго?"),
+    DrawerItemsOfChats("Как правильно ухаживать за обувью?"),
+    DrawerItemsOfChats("Что приготовить на ужин быстро и просто?"),
+    DrawerItemsOfChats("Как избавиться от запаха в холодильнике?"),
+    DrawerItemsOfChats("Как сделать комнату уютнее?"),
+    DrawerItemsOfChats("Как правильно стирать белые вещи?"),
+    DrawerItemsOfChats("Как убрать известковый налет в ванной?"),
+    DrawerItemsOfChats("Как экономить время на уборке?"),
+    DrawerItemsOfChats("Как выбрать хороший пылесос?"),
+    DrawerItemsOfChats("Как правильно ухаживать за комнатными растениями?"),
+    DrawerItemsOfChats("Что делать, если телефон быстро разряжается?")
 )
