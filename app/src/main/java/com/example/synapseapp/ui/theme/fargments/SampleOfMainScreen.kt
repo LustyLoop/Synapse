@@ -6,6 +6,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -17,18 +18,23 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -39,11 +45,18 @@ import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.synapseapp.R
+import com.example.synapseapp.navigation.Routes
+import com.example.synapseapp.room.RoomViewModel
 import com.example.synapseapp.ui.theme.AIMessageBackgroundColor
 import com.example.synapseapp.ui.theme.AiMessageMarkdown
 import data.AiAnswerClass
+import data.DrawerItemsOfChats
 import data.IdentifyRole
+import data.UserAndAiMessages
 import data.UserChatMessages
+import dev.seyfarth.tablericons.TablerIcons
+import dev.seyfarth.tablericons.outlined.Ai
+import dev.seyfarth.tablericons.outlined.X
 import kotlinx.coroutines.launch
 import viewModel.GadgetInfo
 
@@ -59,13 +72,16 @@ fun SampleScreen(
     gadget: GadgetInfo,
     drawerState: DrawerState?,
     wideScreenFlag: Boolean,
+    drawerItemsOfChats: DrawerItemsOfChats? = null,
+    roomViewModel: RoomViewModel? = null,
     BottomBox: @Composable (
         modifier: Modifier,
         navController: NavController,
         userChatMessages: UserChatMessages,
         aiAnswer: AiAnswerClass,
-        drawerState: DrawerState?,
-        wideScreenFlag: Boolean
+        wideScreenFlag: Boolean,
+        drawerItemsOfChats: DrawerItemsOfChats?,
+        roomViewModel: RoomViewModel?
     ) -> Unit
 ) {
     val scope = rememberCoroutineScope()
@@ -140,6 +156,7 @@ fun SampleScreen(
                 colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onBackground)
             )
         }
+
         /*-----------------------------------------------------------------------------*/
 
         Button(
@@ -162,108 +179,109 @@ fun SampleScreen(
         }
         /*-----------------------------------------------------------------------------*/
 
+        if (navController.currentBackStackEntry?.destination?.route == Routes.MAIN_SCREEN) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .navigationBarsPadding()
+                    .imePadding()
+                    .zIndex(-1f),
+                contentPadding = PaddingValues(
+                    top = 70.dp,
+                    bottom = 80.dp,
+                    start = 5.dp
+                ),
+                reverseLayout = true
+            ) {
+                items(
+                    items = UserAndAiMessages.userAndAiMessages,
+                    key = { it.id }
+                ) { box ->
+                    Box(
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        when (box.role) {
+                            IdentifyRole.USER.name -> {
+                                Box(
+                                    modifier = Modifier
+                                        .align(Alignment.BottomEnd)
+                                        .padding(
+                                            top = 15.dp,
+                                            end = 5.dp,
+                                            start = 40.dp
+                                        )
+                                        .background(
+                                            MaterialTheme.colorScheme.surfaceVariant,
+                                            RoundedCornerShape(20.dp)
+                                        )
+                                ) {
+                                    SelectionContainer {
+                                        Text(
+                                            modifier = Modifier.padding(15.dp),
+                                            text = box.text,
+                                            color = MaterialTheme.colorScheme.onSurface,
+                                            style = MaterialTheme.typography.bodyMedium
+                                        )
+                                    }
+                                }
+                            }
 
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .navigationBarsPadding()
-                .imePadding()
-                .zIndex(-1f),
-            contentPadding = PaddingValues(
-                top = 70.dp,
-                bottom = 80.dp,
-                start = 5.dp
-            ),
-            reverseLayout = true
-        ) {
-            items(
-                items = userChatMessages.userAndAiMessages,
-                key = { it.id }
-            ) { box ->
-                Box(
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    when (box.role) {
-                        IdentifyRole.USER -> {
-                            Box(
-                                modifier = Modifier
-                                    .align(Alignment.BottomEnd)
-                                    .padding(
-                                        top = 15.dp,
-                                        end = 5.dp,
-                                        start = 40.dp
-                                    )
-                                    .background(
-                                        MaterialTheme.colorScheme.surfaceVariant,
-                                        RoundedCornerShape(20.dp)
-                                    )
-                            ) {
-                                SelectionContainer {
+                            IdentifyRole.AI.name -> {
+                                Box(
+                                    modifier = Modifier
+                                        .then(
+                                            if (box.errorFlag) {
+                                                Modifier
+                                                    .align(Alignment.BottomCenter)
+                                                    .padding(top = 5.dp, start = 5.dp, end = 5.dp)
+                                                    .background(
+                                                        color = Color.Transparent
+                                                    )
+
+                                            } else {
+                                                Modifier
+                                                    .align(Alignment.BottomStart)
+                                                    .padding(top = 5.dp, start = 0.dp, end = 5.dp)
+                                                    .background(
+                                                        color = AIMessageBackgroundColor,
+                                                        RoundedCornerShape(0.dp)
+                                                    )
+                                            }
+                                        )
+                                ) {
+                                    SelectionContainer {
+                                        AiMessageMarkdown(box)
+                                    }
+                                }
+                            }
+
+                            else -> {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .align(Alignment.Center)
+                                        .background(
+                                            Color.White,
+                                            RoundedCornerShape(20.dp)
+                                        )
+                                ) {
                                     Text(
                                         modifier = Modifier.padding(15.dp),
-                                        text = box.text,
-                                        color = MaterialTheme.colorScheme.onSurface,
-                                        style = MaterialTheme.typography.bodyMedium
+                                        text = "Нет информации",
+                                        color = Color.White,
+                                        fontSize = 18.sp
                                     )
                                 }
-                            }
-                        }
-
-                        IdentifyRole.AI -> {
-                            Box(
-                                modifier = Modifier
-                                    .then(
-                                        if (box.errorFlag) {
-                                            Modifier
-                                                .align(Alignment.BottomCenter)
-                                                .padding(top = 5.dp, start = 5.dp, end = 5.dp)
-                                                .background(
-                                                    color = Color.Transparent
-                                                )
-
-                                        } else {
-                                            Modifier
-                                                .align(Alignment.BottomStart)
-                                                .padding(top = 5.dp, start = 0.dp, end = 5.dp)
-                                                .background(
-                                                    color = AIMessageBackgroundColor,
-                                                    RoundedCornerShape(0.dp)
-                                                )
-                                        }
-                                    )
-                            ) {
-                                SelectionContainer {
-                                    AiMessageMarkdown(box)
-                                }
-                            }
-                        }
-
-                        else -> {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .align(Alignment.Center)
-                                    .background(
-                                        Color.White,
-                                        RoundedCornerShape(20.dp)
-                                    )
-                            ) {
-                                Text(
-                                    modifier = Modifier.padding(15.dp),
-                                    text = "Нет информации",
-                                    color = Color.White,
-                                    fontSize = 18.sp
-                                )
                             }
                         }
                     }
                 }
-            }
 
+            }
         }
         BottomBox(
             Modifier
-                .align(Alignment.BottomStart)
+                .align(Alignment.BottomCenter)
                 .navigationBarsPadding()
                 .imePadding()
                 .padding(
@@ -274,8 +292,9 @@ fun SampleScreen(
             navController,
             userChatMessages,
             aiAnswer,
-            drawerState,
-            wideScreenFlag
+            wideScreenFlag,
+            drawerItemsOfChats,
+            roomViewModel
         )
         Box(
             modifier = Modifier

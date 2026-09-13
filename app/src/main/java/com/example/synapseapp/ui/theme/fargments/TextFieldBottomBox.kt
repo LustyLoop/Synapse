@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -32,7 +33,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.synapseapp.room.RoomViewModel
 import data.AiAnswerClass
+import data.DrawerItemsOfChats
 import data.UserChatMessages
 import data.UserTextStateHolder
 
@@ -43,52 +46,30 @@ fun TextFieldBottomBox(
     navController: NavController,
     userChatMessages: UserChatMessages,
     aiAnswer: AiAnswerClass,
-    drawerState: DrawerState?,
-    wideScreenFlag: Boolean
+    wideScreenFlag: Boolean,
+    drawerItemsOfChats: DrawerItemsOfChats? = null,
+    roomViewModel: RoomViewModel? = null
 ) {
 
     val state = UserTextStateHolder.objectOfUserTextState
     val keyboardController = LocalSoftwareKeyboardController.current
-    BoxWithConstraints(
-        modifier = modifier.then(
-            if(drawerState?.isClosed == true && wideScreenFlag) {
-                Modifier.padding(start = 80.dp, end = 80.dp)
-            }
-            else{
-                Modifier.padding(0.dp)
-            }
-        )
+    Box(
+        modifier = modifier
+            .then(
+                if (wideScreenFlag) {
+                    Modifier.fillMaxWidth(0.7f)
+                } else {
+                    Modifier.fillMaxWidth(1.0f)
+                }
+            )
             .background(
                 color = MaterialTheme.colorScheme.surface,
                 RoundedCornerShape(40.dp)
             )
             .height(60.dp)
     ) {
-
-        val drawerWidth = 300.dp
-
-        val contentWidth by animateDpAsState(
-            targetValue = if (drawerState?.isOpen == true) {
-                maxWidth - drawerWidth
-            } else {
-                maxWidth
-            },
-            label = "contentWidth"
-        )
         Row(
-            modifier = Modifier.then(
-                if (maxWidth > 600.dp) {
-                    Modifier
-                        .fillMaxHeight()
-                        .width(contentWidth)
-                } else {
-                    Modifier
-                        .fillMaxHeight()
-                        .fillMaxWidth(1.0f)
-                }
-
-            ),
-            //modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize(),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Spacer(modifier = Modifier.width(5.dp))
@@ -128,14 +109,16 @@ fun TextFieldBottomBox(
                 }
             )
             Spacer(modifier = Modifier.width(13.dp))
-
+            
             Button(
                 onClick = {
                     keyboardController?.hide()
                     userChatMessages.chatHandler(
                         aiAnswer,
                         userChatMessages,
-                        navController
+                        navController,
+                        drawerItemsOfChats,
+                        roomViewModel
                     )
                 },
                 modifier = Modifier

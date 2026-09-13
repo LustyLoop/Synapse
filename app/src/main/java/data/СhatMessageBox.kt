@@ -1,15 +1,15 @@
 package data
 
-import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.serialization.Serializable
 
-enum class IdentifyRole(){
+
+enum class IdentifyRole{
     USER,
     AI,
     NULL
 }
-enum class IdentifyTypeMessage(){
+
+enum class IdentifyTypeMessage{
     IMAGE,
     TEXT,
     NULL
@@ -17,10 +17,9 @@ enum class IdentifyTypeMessage(){
 
 data class ChatMessageBox(
     var id: String = "",
-    val role: IdentifyRole = IdentifyRole.NULL,
-    val type: IdentifyTypeMessage = IdentifyTypeMessage.NULL,
-    val text: String,
+    val role: String = IdentifyRole.NULL.name,
+    val type: String = IdentifyTypeMessage.NULL.name,
+    val text: String = "",
     val imageSrc: Int? = null,
-    var errorFlag: Boolean = false,
-    val response: Flow<String> = emptyFlow()
-) : ViewModel()
+    var errorFlag: Boolean = false
+)

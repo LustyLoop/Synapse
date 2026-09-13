@@ -21,10 +21,14 @@ import com.aallam.openai.client.OpenAI
 import com.aallam.openai.client.OpenAIConfig
 import com.aallam.openai.client.OpenAIHost
 import com.example.synapseapp.airequests.api.API
+import com.example.synapseapp.room.RoomViewModel
+import data.DrawerItemsOfChats
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import kotlinx.io.IOException
 import java.net.InetAddress
+import kotlin.time.Duration.Companion.milliseconds
 
 
 var prompt = """## Rules
@@ -35,11 +39,11 @@ var prompt = """## Rules
     - Follow all rules strictly.
         """.trimIndent()
 
-class AiClient() {
-    suspend fun isInternetAvailable(): Boolean {
+class AiClient {
+    suspend fun checkInternet(): Boolean {
         return try {
             withContext(Dispatchers.IO) {
-                InetAddress.getByName("google.com")
+                InetAddress.getByName("yandex.ru")
             }
             true
         } catch (_: Exception) {
@@ -59,18 +63,19 @@ class AiClient() {
     @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
     suspend fun sendMessage(
         message: String,
-        temperature: Double = 0.5,
+        temperature: Double = 0.7,
         maxTokens: Int = 900,
         aiModel: String = "deepseek-v4-flash/latest",//"aliceai-llm/latest"
+        drawerItemsOfChats: DrawerItemsOfChats?,
+        roomViewModel: RoomViewModel?,
         onText: (String) -> Unit
     ): Result<String> {
-        if (!isInternetAvailable()) {
+        if (!this@AiClient.checkInternet()) {
             return Result.failure(Exception("Проверьте подключение к интернету"))
         }
-
         ChatHistory.setPrompt(prompt + """ - **Always take the maximum number of tokens into account. $maxTokens** """.trimIndent())
         ChatHistory.addMessage(ChatRole.User, message)
-        var content = "### ${aiModel.substringBefore("/")}" + "  \n"
+
         val request = ChatCompletionRequest(
             model = ModelId("gpt://${API.YANDEX_FOLDER_ID}/$aiModel"),
             temperature = temperature,
@@ -86,8 +91,7 @@ class AiClient() {
             )
         )
         return try {
-            //val modelIds = openAI.models()
-            //    .map { it.id.id }
+            var content = "##### ${aiModel.substringBefore("/")}" + "  \n"
             openAI.chatCompletions(
                 request = request,
                 requestOptions = requestOptions
@@ -99,9 +103,12 @@ class AiClient() {
                     .orEmpty()
                 content += text
                 onText(content)
+                delay(10.milliseconds)
             }
+            drawerItemsOfChats?.updateWholeChat(roomViewModel)
             ChatHistory.addMessage(ChatRole.Assistant, content)
-            Result.success("### ${aiModel.substringBefore("/")}" + "  \n" + content)
+            val result = "###### ${aiModel.substringBefore("/")}" + "  \n" + content
+            Result.success(result)
 
         } catch (e: OpenAIException) {
             when (e) {

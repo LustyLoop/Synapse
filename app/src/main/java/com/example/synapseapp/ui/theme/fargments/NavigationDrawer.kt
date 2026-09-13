@@ -1,20 +1,28 @@
 package com.example.synapseapp.ui.theme.fargments
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material3.DismissibleDrawerSheet
-import androidx.compose.material3.DismissibleNavigationDrawer
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -28,19 +36,25 @@ import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.synapseapp.R
+import com.example.synapseapp.room.RoomViewModel
+import data.DrawerItemsOfChats
+import data.UserAndAiMessages
 import dev.seyfarth.tablericons.TablerIcons
+import dev.seyfarth.tablericons.outlined.DotsVertical
+import dev.seyfarth.tablericons.outlined.Edit
 import dev.seyfarth.tablericons.outlined.LibraryPhoto
-import dev.seyfarth.tablericons.outlined.MessageCirclePlus
 import dev.seyfarth.tablericons.outlined.Settings
 import dev.seyfarth.tablericons.outlined.X
 import kotlinx.coroutines.CoroutineScope
@@ -51,9 +65,11 @@ import viewModel.GadgetInfo
 @Composable
 fun SampleOfNavigationDrawer(
     scope: CoroutineScope,
-    drawerState: DrawerState
+    drawerState: DrawerState,
+    drawerItemsOfChats: DrawerItemsOfChats,
+    roomViewModel: RoomViewModel
 ) {
-    Column(
+    LazyColumn(
         modifier = Modifier
             .padding(
                 start = 5.dp,
@@ -61,8 +77,9 @@ fun SampleOfNavigationDrawer(
                 top = 16.dp,
                 bottom = 16.dp
             )
-            .verticalScroll(rememberScrollState())
+        //.verticalScroll(rememberScrollState())
     ) {
+        item {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -87,7 +104,6 @@ fun SampleOfNavigationDrawer(
                     }
                 },
                 modifier = Modifier
-                    //.padding(top = 8.dp)
                     .size(48.dp)
             )
             {
@@ -101,7 +117,18 @@ fun SampleOfNavigationDrawer(
         }
         ShowNavigationDrawerItem(
             labelText = "Новый чат",
-            iconId = TablerIcons.Outlined.MessageCirclePlus,
+            iconId = TablerIcons.Outlined.Edit,
+            textStartPaddingValue = 6.dp,
+            onClick = {
+                UserAndAiMessages.createNewChat()
+                scope.launch {
+                    drawerState.close()
+                }
+            }
+        )
+        ShowNavigationDrawerItem(
+            labelText = "Выбор модели ИИ",
+            iconId = Icons.Rounded.AutoAwesome,
             textStartPaddingValue = 6.dp
         )
         ShowNavigationDrawerItem(
@@ -127,75 +154,126 @@ fun SampleOfNavigationDrawer(
             style = MaterialTheme.typography.titleMedium
         )
         Spacer(Modifier.height(6.dp))
-        menuItems.forEach { item ->
-            NavigationDrawerItem(
-                modifier = Modifier.height(45.dp),
-                label = {
-                    Text(
-                        modifier = Modifier.padding(start = 4.dp),
-                        text =
-                            if (item.title.length > 24) item.title.substring(0, 24)
-                                .dropLast(1) + "…"
-                            else item.title,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-                },
-                selected = false,
-                onClick = {}
-            )
-        }
-
+            }
+            items(
+                items = drawerItemsOfChats.allChats,
+                key = { item -> item.id }
+            ) { item ->
+                NavigationDrawerItem(
+                    modifier = Modifier.height(50.dp),
+                    label = {
+                        Text(
+                            text = item.title,
+                            modifier = Modifier.padding(start = 4.dp),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                    },
+                    selected = false,
+                    onClick = {
+                        drawerItemsOfChats.showSelectedChat(item.id, roomViewModel)
+                        scope.launch {
+                            drawerState.close()
+                        }
+                    },
+                    badge = {
+                        IconButton(onClick = {}) {
+                            TriplePoint()
+                        }
+                    }
+                )
+            }
     }
 }
 
+@Composable
+fun TriplePoint() {
+    Icon(
+        imageVector = TablerIcons.Outlined.DotsVertical,
+        contentDescription = "",
+        modifier = Modifier.size(18.dp),
+        tint = MaterialTheme.colorScheme.onBackground
+    )
+
+}
 
 @SuppressLint("CoroutineCreationDuringComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NavigationDrawer(
-    localMainScreen: @Composable (NavController, GadgetInfo, DrawerState, Boolean) -> Unit,
+    localMainScreen: @Composable (
+        NavController,
+        GadgetInfo,
+        DrawerState,
+        Boolean,
+        DrawerItemsOfChats,
+        RoomViewModel
+    ) -> Unit,
     navController: NavController,
     gadget: GadgetInfo,
-    wideScreenFlag: Boolean
+    wideScreenFlag: Boolean,
+    drawerItemsOfChats: DrawerItemsOfChats = viewModel(),
+    roomViewModel: RoomViewModel = viewModel(factory = RoomViewModel.factory)
 ) {
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+
+    val drawerState = rememberDrawerState(
+        initialValue = DrawerValue.Closed
+    )
     val scope = rememberCoroutineScope()
 
-    if(wideScreenFlag){
-        DismissibleNavigationDrawer(
-            modifier = Modifier.padding(start = 0.dp),
-            drawerContent = {
+    if (wideScreenFlag) {
+        val drawerWidth by animateDpAsState(
+            targetValue = if (drawerState.isOpen) 300.dp else 0.dp,
+            label = "drawerWidth"
+        )
+        Row(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            if (drawerWidth > 0.dp) {
                 DismissibleDrawerSheet(
                     drawerContainerColor = MaterialTheme.colorScheme.background,
                     drawerContentColor = MaterialTheme.colorScheme.onBackground,
-                    modifier = Modifier.width(300.dp)
+                    modifier = Modifier
+                        .width(drawerWidth)
+                        .fillMaxHeight()
                 ) {
                     SampleOfNavigationDrawer(
                         scope,
-                        drawerState
+                        drawerState,
+                        drawerItemsOfChats,
+                        roomViewModel
                     )
                 }
-            },
-            drawerState = drawerState
-        ) {
-            localMainScreen(
-                navController,
-                gadget,
-                drawerState,
-                wideScreenFlag
-            )
+            }
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+            ) {
+                localMainScreen(
+                    navController,
+                    gadget,
+                    drawerState,
+                    wideScreenFlag,
+                    drawerItemsOfChats,
+                    roomViewModel
+                )
+            }
         }
         BackHandler(enabled = drawerState.isOpen) {
             scope.launch {
                 drawerState.close()
             }
         }
-    }
-    else {
+
+    } else {
         ModalNavigationDrawer(
             modifier = Modifier.padding(start = 0.dp),
-            scrimColor = MaterialTheme.colorScheme.background.copy(alpha = 0.4f),
+            scrimColor = MaterialTheme.colorScheme.background.copy(
+                alpha = 0.4f
+            ),
             drawerContent = {
                 ModalDrawerSheet(
                     drawerContainerColor = MaterialTheme.colorScheme.background,
@@ -204,7 +282,9 @@ fun NavigationDrawer(
                 ) {
                     SampleOfNavigationDrawer(
                         scope,
-                        drawerState
+                        drawerState,
+                        drawerItemsOfChats,
+                        roomViewModel
                     )
                 }
             },
@@ -214,7 +294,9 @@ fun NavigationDrawer(
                 navController,
                 gadget,
                 drawerState,
-                wideScreenFlag
+                wideScreenFlag,
+                drawerItemsOfChats,
+                roomViewModel
             )
         }
 
@@ -255,7 +337,7 @@ fun ShowNavigationDrawerItem(
                     contentDescription = null,
                     colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onBackground)
                 )
-            } else 0
+            }
             if (iconId != null) {
                 Icon(
                     modifier = Modifier
@@ -264,7 +346,7 @@ fun ShowNavigationDrawerItem(
                     imageVector = iconId,
                     contentDescription = null
                 )
-            } else null
+            }
         },
         badge = { Text(badgeText ?: "") },
         colors = NavigationDrawerItemDefaults.colors(
@@ -275,31 +357,3 @@ fun ShowNavigationDrawerItem(
         onClick = onClick
     )
 }
-
-data class DrawerItemsOfChats(
-    val title: String
-)
-
-
-val menuItems = listOf(
-    DrawerItemsOfChats("Как приготовить вкусный завтрак?"),
-    DrawerItemsOfChats("Как быстро убрать пятно с одежды?"),
-    DrawerItemsOfChats("Как правильно хранить продукты в холодильнике?"),
-    DrawerItemsOfChats("Как избавиться от неприятного запаха в комнате?"),
-    DrawerItemsOfChats("Как выбрать хороший матрас для сна?"),
-    DrawerItemsOfChats("Как быстро высушить одежду дома?"),
-    DrawerItemsOfChats("Как почистить клавиатуру компьютера?"),
-    DrawerItemsOfChats("Как организовать рабочее место дома?"),
-    DrawerItemsOfChats("Как сэкономить на коммунальных расходах?"),
-    DrawerItemsOfChats("Как убрать пыль надолго?"),
-    DrawerItemsOfChats("Как правильно ухаживать за обувью?"),
-    DrawerItemsOfChats("Что приготовить на ужин быстро и просто?"),
-    DrawerItemsOfChats("Как избавиться от запаха в холодильнике?"),
-    DrawerItemsOfChats("Как сделать комнату уютнее?"),
-    DrawerItemsOfChats("Как правильно стирать белые вещи?"),
-    DrawerItemsOfChats("Как убрать известковый налет в ванной?"),
-    DrawerItemsOfChats("Как экономить время на уборке?"),
-    DrawerItemsOfChats("Как выбрать хороший пылесос?"),
-    DrawerItemsOfChats("Как правильно ухаживать за комнатными растениями?"),
-    DrawerItemsOfChats("Что делать, если телефон быстро разряжается?")
-)

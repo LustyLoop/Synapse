@@ -55,7 +55,7 @@ half4 main(float2 fragCoord)
     float shapeField = mix(waveField, radialField, morph);
 
     // Шар становится четче по мере округления
-    float softness = mix(0.09, 0.018, morph);
+    float softness = mix(0.15, 0.018, morph);
 
     float shapeMask = 1.0 - smoothstep(-softness, softness, shapeField);
 

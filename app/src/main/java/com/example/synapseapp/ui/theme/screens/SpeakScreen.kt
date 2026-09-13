@@ -32,10 +32,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.synapseapp.room.RoomViewModel
 import com.example.synapseapp.ui.theme.fargments.SampleScreen
 import data.AiAnswerClass
-import data.AllShaders
-import data.Shaders
+import data.DrawerItemsOfChats
+import data.DrawerItemsType
 import data.UserChatMessages
 import data.UserTextStateHolder
 import dev.seyfarth.tablericons.TablerIcons
@@ -51,10 +52,9 @@ import viewModel.GadgetInfo
 fun SpeakScreen(
     navController: NavController,
     gadget: GadgetInfo,
-    wideScreenFlag: Boolean
+    wideScreenFlag: Boolean,
 ) {
     val scope = rememberCoroutineScope()
-    Shaders.currentShader = AllShaders.Ball
     SampleScreen(
         navController = navController,
         BottomBox = ::SpeakBottomBox,
@@ -79,11 +79,11 @@ fun SpeakBottomBox(
     navController: NavController,
     userChatMessages: UserChatMessages,
     aiAnswer: AiAnswerClass,
-    drawerState: DrawerState?,
-    wideScreenFlag: Boolean
+    wideScreenFlag: Boolean,
+    drawerItemsOfChats: DrawerItemsOfChats?,
+    roomViewModel: RoomViewModel?
 ) {
-    val state = UserTextStateHolder.objectOfUserTextState
-    val keyboardController = LocalSoftwareKeyboardController.current
+
     var backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
     val padding = 3.dp
 
