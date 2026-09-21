@@ -1,11 +1,9 @@
 package data
 
-import kotlinx.serialization.Serializable
-
-
 enum class IdentifyRole{
     USER,
     AI,
+    SYSTEM,
     NULL
 }
 

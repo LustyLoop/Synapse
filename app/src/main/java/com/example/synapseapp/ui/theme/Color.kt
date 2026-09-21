@@ -14,10 +14,10 @@ val GreyColor = Color(
 )
 
 val GreyForTextFieldColor = Color(0xFFADB5BD)
-val SorfBlueColor = Color(
-    red = 190,
-    green = 215,
-    blue = 250
+val BabyBlueColor = Color(
+    red = 137,
+    green = 207,
+    blue = 240
 )
 val UserMessageBackgroundColorDark = Color(
     red = 55,

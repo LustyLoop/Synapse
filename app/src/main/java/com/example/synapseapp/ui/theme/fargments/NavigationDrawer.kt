@@ -156,7 +156,7 @@ fun SampleOfNavigationDrawer(
         Spacer(Modifier.height(6.dp))
             }
             items(
-                items = drawerItemsOfChats.allChats,
+                items = drawerItemsOfChats.allChats.reversed(),
                 key = { item -> item.id }
             ) { item ->
                 NavigationDrawerItem(

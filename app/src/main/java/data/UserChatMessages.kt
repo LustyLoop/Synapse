@@ -11,6 +11,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.example.synapseapp.airequests.AI
+import com.example.synapseapp.airequests.ChatHistory
 import com.example.synapseapp.navigation.Routes
 import com.example.synapseapp.room.RoomViewModel
 import com.example.synapseapp.ui.theme.screens.ShaderFlags
@@ -23,22 +24,28 @@ import java.util.UUID
 import kotlin.jvm.java
 
 @SuppressLint("MutableCollectionMutableState")
-object UserAndAiMessages: ViewModel() {
+object UserAndAiMessages : ViewModel() {
     val userAndAiMessages = mutableStateListOf<ChatMessageBox>()
 
 
     private val shaderState = UserTextStateHolder.objectOfUserTextState.hideShaderFlag
-    fun createNewChat(){
+    fun createNewChat() {
+        ChatHistory.clear()
         userAndAiMessages.clear()
         shaderState.value = false
     }
 }
 
-class UserChatMessages: ViewModel() {
+class UserChatMessages : ViewModel() {
     private val state = UserTextStateHolder.objectOfUserTextState
     var currentControlIcon by mutableStateOf(ChatIconState.SPEAK)
 
-
+    @Composable
+    fun IconHandler() {
+        currentControlIcon =
+            if (state.userText.isEmpty()) ChatIconState.SPEAK
+            else ChatIconState.SEND
+    }
     fun chatHandler(
         aiAnswer: AiAnswerClass,
         userChatMessages: UserChatMessages,
@@ -52,24 +59,20 @@ class UserChatMessages: ViewModel() {
                     val dialog = UserAndAiMessages.userAndAiMessages
                     state.hideShaderFlag.value = true
                     dialog.add(
-                        0,
-                        ChatMessageBox(
+                        0, ChatMessageBox(
                             id = UUID.randomUUID().toString(),
                             role = IdentifyRole.USER.name,
                             type = IdentifyTypeMessage.TEXT.name,
                             text = state.userText
                         )
                     )
-                    if (dialog.size == 1) {
-                        drawerItemsOfChats?.loadTitleForDrawer()
-                    }
-
+                    if (dialog.size == 1) drawerItemsOfChats?.loadTitleForDrawer()
                     aiAnswer.aiAnswerHandler(
                         viewModelObj = userChatMessages,
                         state = state,
                         drawerItemsOfChats = drawerItemsOfChats,
                         roomViewModel = roomViewModel
-                        )
+                    )
                     drawerItemsOfChats?.updateWholeChat(roomViewModel)
                 }
 
@@ -78,20 +81,11 @@ class UserChatMessages: ViewModel() {
                     delay(240)
                     navController.navigate(Routes.SPEAK_SCREEN)
                 }
+
                 ChatIconState.STOP -> {
                     //"Реализовать стоп"
                 }
             }
-        }
-    }
-
-
-    @Composable
-    fun IconHandler() {
-        currentControlIcon = if (state.userText.isEmpty()) {
-            ChatIconState.SPEAK
-        } else {
-            ChatIconState.SEND
         }
     }
 }
@@ -100,13 +94,10 @@ class AiAnswerClass : ViewModel() {
     private fun indexHandler(
         messageId: String,
         aiMessage: ChatMessageBox
-    ){
-        val index = UserAndAiMessages.userAndAiMessages
-            .indexOfFirst { it.id == messageId }
+    ) {
+        val index = UserAndAiMessages.userAndAiMessages.indexOfFirst { it.id == messageId }
 
-        if (index != -1) {
-            UserAndAiMessages.userAndAiMessages[index] = aiMessage
-        }
+        if (index != -1) UserAndAiMessages.userAndAiMessages[index] = aiMessage
     }
 
     fun aiAnswerHandler(
@@ -127,7 +118,7 @@ class AiAnswerClass : ViewModel() {
             UserAndAiMessages.userAndAiMessages.add(0, aiMessage)
             if (aiMessage.text.isEmpty()) {
                 launch {
-
+                    //Imagine a loading animation
                 }
             }
             val localRequest = state.userText
@@ -136,17 +127,13 @@ class AiAnswerClass : ViewModel() {
                 message = localRequest,
                 drawerItemsOfChats = drawerItemsOfChats,
                 roomViewModel = roomViewModel
-            )
-            { text ->
-
+            ) { text ->
                 aiMessage = aiMessage.copy(text = text)
-
                 indexHandler(messageId, aiMessage)
             }
             if (result.isFailure) {
                 aiMessage = aiMessage.copy(
-                    text = "Ошибка: ${result.exceptionOrNull()?.message}",
-                    errorFlag = true
+                    text = "Ошибка: ${result.exceptionOrNull()?.message}", errorFlag = true
                 )
                 indexHandler(messageId, aiMessage)
             }

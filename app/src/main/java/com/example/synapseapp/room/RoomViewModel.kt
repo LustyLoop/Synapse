@@ -8,58 +8,52 @@ import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.AP
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.example.synapseapp.MyApp
+// import com.example.synapseapp.airequests.ChatHistory
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import data.ChatMessageBox
 import data.DrawerItemsType
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import kotlin.time.Duration.Companion.milliseconds
 
 class RoomViewModel(database: MainDb) : ViewModel() {
     private val db = database
 
-    fun insertDrawerItem(allChats: SnapshotStateList<DrawerItemsType>) {
+    fun insertDrawerItem(id: String, title: String, messages: List<ChatMessageBox>) {
         viewModelScope.launch {
-                val gson = Gson()
-                val jsonString = gson.toJson(allChats.lastOrNull()?.wholeChat)
-                val item = DrawerItemsEntity(
-                    id = allChats.last().id,
-                    title = allChats.last().title,
-                    wholeChat = jsonString
-                )
-                db.dao.insertDrawerItem(item)
+            val gson = Gson()
+            val jsonString = gson.toJson(messages)
+            val item = DrawerItemsEntity(
+                id = id,
+                title = title,
+                wholeChat = jsonString,
+            )
+            db.dao.insertDrawerItem(item)
         }
     }
 
     suspend fun getWholeChatById(id: String): List<ChatMessageBox> {
-        val jsonString = db.dao.getWholeChatById(id)
+        val jsonString = db.dao.getWholeChatById(id) ?: return emptyList()
         val gson = Gson()
         val result: List<ChatMessageBox> = gson.fromJson(
             jsonString,
             object : TypeToken<List<ChatMessageBox>>() {}.type
         )
         Log.v("result", result.toString())
-    return result
-
+        return result
     }
 
     fun getShortItems(allChats: SnapshotStateList<DrawerItemsType>) {
         viewModelScope.launch {
-            val shortItems = db.dao.getShortItems()
+            val shortItems = db.dao.getIdTitleDrawerItems()
             allChats.clear()
             shortItems.forEach { item ->
-                allChats.add(0,
+                allChats.add(
                     DrawerItemsType(
                         id = item.id,
-                        title = item.title,
-                        wholeChat = emptyList()
+                        title = item.title
                     )
                 )
+                Log.v("item.wholeChat",item.toString())
             }
 
         }

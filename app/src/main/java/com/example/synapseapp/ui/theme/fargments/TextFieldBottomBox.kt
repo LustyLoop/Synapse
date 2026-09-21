@@ -56,11 +56,8 @@ fun TextFieldBottomBox(
     Box(
         modifier = modifier
             .then(
-                if (wideScreenFlag) {
-                    Modifier.fillMaxWidth(0.7f)
-                } else {
-                    Modifier.fillMaxWidth(1.0f)
-                }
+                if (wideScreenFlag) Modifier.fillMaxWidth(0.7f)
+                else Modifier.fillMaxWidth(1.0f)
             )
             .background(
                 color = MaterialTheme.colorScheme.surface,
@@ -80,8 +77,7 @@ fun TextFieldBottomBox(
                 Icon(
                     imageVector = Icons.Rounded.Add,
                     contentDescription = "Прикрепить файл",
-                    modifier = Modifier
-                        .size(30.dp),
+                    modifier = Modifier.size(30.dp),
                     tint = MaterialTheme.colorScheme.onBackground
                 )
             }
@@ -93,8 +89,7 @@ fun TextFieldBottomBox(
                 textStyle = MaterialTheme.typography.bodyMedium.copy(
                     color = MaterialTheme.colorScheme.onSurface
                 ),
-                modifier = Modifier
-                    .weight(1f),
+                modifier = Modifier.weight(1f),
                 decorationBox = { innerTextField ->
                     Box {
                         if (state.userText.isEmpty()) {
@@ -109,7 +104,7 @@ fun TextFieldBottomBox(
                 }
             )
             Spacer(modifier = Modifier.width(13.dp))
-            
+
             Button(
                 onClick = {
                     keyboardController?.hide()
@@ -121,8 +116,7 @@ fun TextFieldBottomBox(
                         roomViewModel
                     )
                 },
-                modifier = Modifier
-                    .size(35.dp),
+                modifier = Modifier.size(35.dp),
                 contentPadding = PaddingValues(0.dp),
                 colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary)
             )
@@ -130,8 +124,7 @@ fun TextFieldBottomBox(
                 Icon(
                     imageVector = userChatMessages.currentControlIcon.imageVector,
                     contentDescription = userChatMessages.currentControlIcon.contentDescription,
-                    modifier = Modifier
-                        .size(27.dp),
+                    modifier = Modifier.size(27.dp),
                     tint = MaterialTheme.colorScheme.background
                 )
             }

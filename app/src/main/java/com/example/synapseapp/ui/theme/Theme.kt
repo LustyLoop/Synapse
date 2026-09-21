@@ -20,7 +20,7 @@ private val LightColorScheme = lightColorScheme(
 )
 
 private val DarkColorScheme = darkColorScheme(
-    primary = SorfBlueColor,
+    primary = BabyBlueColor,
     onPrimary = Color.Black,
     background = DarkBackgroundColor,
     inverseSurface = Color.White,

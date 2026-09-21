@@ -6,7 +6,7 @@ import androidx.room3.Insert
 import androidx.room3.OnConflictStrategy
 import androidx.room3.Query
 import androidx.room3.Update
-import data.DrawerItemShort
+import data.DrawerItemsType
 
 
 @Dao
@@ -21,8 +21,8 @@ interface Dao{
     /**
      * Получение только title и id
      */
-    @Query("SELECT id, title FROM DrawerItems")
-    suspend fun getShortItems(): List<DrawerItemShort>
+//    @Query("SELECT id, title FROM DrawerItems")
+//    suspend fun getShortItems(): List<DrawerItemsType>
 
     /**
      * Обновляет существующий элемент.
@@ -42,6 +42,9 @@ interface Dao{
      */
     @Query("SELECT * FROM DrawerItems")
     suspend fun getAllDrawerItems(): List<DrawerItemsEntity>
+
+    @Query("SELECT id, title FROM DrawerItems")
+    suspend fun getIdTitleDrawerItems(): List<DrawerItemsType>
 
 
     /**

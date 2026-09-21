@@ -38,6 +38,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -85,6 +86,7 @@ fun SampleScreen(
     ) -> Unit
 ) {
     val scope = rememberCoroutineScope()
+    val keyboardController = LocalSoftwareKeyboardController.current
     userChatMessages.IconHandler()
     Box(
         modifier = Modifier
@@ -130,10 +132,12 @@ fun SampleScreen(
         }
 
         /*-----------------------------------------------------------------------------*/
+
         Button(
             onClick = {
                 //gadget.batteryCharge += 1
                 scope.launch {
+                    keyboardController?.hide()
                     drawerState?.open()
                 }
 
@@ -233,7 +237,7 @@ fun SampleScreen(
                                             if (box.errorFlag) {
                                                 Modifier
                                                     .align(Alignment.BottomCenter)
-                                                    .padding(top = 5.dp, start = 5.dp, end = 5.dp)
+                                                    .padding(top = 5.dp, start = 20.dp, end = 20.dp)
                                                     .background(
                                                         color = Color.Transparent
                                                     )
