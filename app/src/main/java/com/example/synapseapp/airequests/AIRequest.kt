@@ -1,7 +1,7 @@
 package com.example.synapseapp.airequests
 
-
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresExtension
 import com.aallam.openai.api.chat.ChatCompletionRequest
 import com.aallam.openai.api.chat.ChatRole
@@ -25,31 +25,24 @@ import com.example.synapseapp.airequests.api.API
 import com.example.synapseapp.room.RoomViewModel
 import data.DrawerItemsOfChats
 import data.UserAndAiMessages
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.withContext
 import kotlinx.io.IOException
-import java.net.InetAddress
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 
 
 class AiClient {
-    private suspend fun checkInternet(): Boolean {
-        return try {
-            withContext(Dispatchers.IO) {
-                InetAddress.getByName("aistudio.yandex.ru")
-            }
-            true
-        } catch (_: Exception) {
-            false
-        }
-    }
 
     private val openAI = OpenAI(
         OpenAIConfig(
             token = API.API_KEY,
-            host = OpenAIHost("https://ai.api.cloud.yandex.net/v1/")
+            host = OpenAIHost(
+                baseUrl = "https://routerai.ru/api/v1/"
+            ),
         )
     )
 
@@ -78,31 +71,41 @@ class AiClient {
         message: String,
         temperature: Double = 0.7,
         maxTokens: Int = 900,
-        aiModel: String = "deepseek-v4-flash/latest", //"aliceai-llm/latest"
+        aiModel: String = "deepseek/deepseek-v4.1-flash",
         drawerItemsOfChats: DrawerItemsOfChats?,
         roomViewModel: RoomViewModel?,
         onText: (String) -> Unit
     ): Result<String> {
-        if (!this@AiClient.checkInternet()) return Result.failure(Exception("Проверьте подключение к интернету"))
+        //if (!this@AiClient.checkInternet()) return Result.failure(Exception("Проверьте подключение к интернету"))
         if (ChatHistory.allChatList.isEmpty()) setHistory()
+        val calendarTime: Date = Calendar.getInstance().time
+
+        val dateFormatter = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
+        val timeFormatter = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
+
+        val formattedDate: String = dateFormatter.format(calendarTime)
+        val formattedTime: String = timeFormatter.format(calendarTime)
 
         ChatHistory.setPrompt(
             ChatHistory.myPrompt +
-                    """ - **Always take the maximum number of tokens into account. $maxTokens** """.trimIndent()
+                    """ - **Always take the maximum number of tokens into account. $maxTokens** .
+                        Current date: $formattedDate .
+                        Current time: $formattedTime .
+                    """.trimIndent()
         )
+        Log.w("prompt", ChatHistory.myPrompt)
         ChatHistory.addMessage(ChatRole.User, message)
 
         val request = ChatCompletionRequest(
-            model = ModelId("gpt://${API.YANDEX_FOLDER_ID}/$aiModel"),
+            model = ModelId(aiModel),
             temperature = temperature,
             maxTokens = maxTokens,
             messages = ChatHistory.allChatList,
-            reasoningEffort = Effort("none")
+            reasoningEffort = Effort("none"),
             //webSearchOptions = WebSearchOptions()
         )
 
         val requestOptions = RequestOptions(
-            headers = mapOf("OpenAI-Project" to API.YANDEX_FOLDER_ID),
             timeout = Timeout(
                 request = 5.minutes,
                 socket = 10.minutes,
@@ -110,7 +113,7 @@ class AiClient {
             )
         )
         return try {
-            var content: String = ""// ?
+            var content: String = "###### ${aiModel.substringAfter("/")}" + "  \n"
             openAI.chatCompletions(
                 request = request,
                 requestOptions = requestOptions
@@ -120,8 +123,9 @@ class AiClient {
                 delay(10.milliseconds)
             }
             drawerItemsOfChats?.updateWholeChat(roomViewModel)
-            ChatHistory.addMessage(ChatRole.Assistant, content)
-            Result.success("###### ${aiModel.substringBefore("/")}" + "  \n" + content)
+            ChatHistory.addMessage(ChatRole.Assistant, content.substringAfter("/n"))
+            //Result.success("###### ${aiModel.substringAfter("/")}" + "  \n" + content)
+            Result.success(content)
 
         } catch (e: OpenAIException) {
             when (e) {

@@ -74,6 +74,7 @@ dependencies {
     implementation(libs.openai.client)
     runtimeOnly(libs.ktor.client.okhttp)
 
+
     implementation("com.mikepenz:multiplatform-markdown-renderer:0.43.0")
     implementation("com.mikepenz:multiplatform-markdown-renderer-m3:0.43.0")
     implementation("com.mikepenz:multiplatform-markdown-renderer-code:0.43.0")
