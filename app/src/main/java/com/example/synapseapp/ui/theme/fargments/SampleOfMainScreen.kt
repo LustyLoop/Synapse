@@ -6,7 +6,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -18,23 +17,26 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -55,9 +57,6 @@ import data.DrawerItemsOfChats
 import data.IdentifyRole
 import data.UserAndAiMessages
 import data.UserChatMessages
-import dev.seyfarth.tablericons.TablerIcons
-import dev.seyfarth.tablericons.outlined.Ai
-import dev.seyfarth.tablericons.outlined.X
 import kotlinx.coroutines.launch
 import viewModel.GadgetInfo
 
@@ -87,6 +86,7 @@ fun SampleScreen(
 ) {
     val scope = rememberCoroutineScope()
     val keyboardController = LocalSoftwareKeyboardController.current
+    var isModelPickerVisible by remember { mutableStateOf(false) }
     userChatMessages.IconHandler()
     Box(
         modifier = Modifier
@@ -115,18 +115,18 @@ fun SampleScreen(
             modifier = Modifier
                 .align(Alignment.TopEnd)
                 .padding(
-                    top = 16.dp,
-                    end = 10.dp
+                    top = 13.dp,
+                    end = 12.dp
                 )
-                .height(55.dp)
-                .width(110.dp),
+                .height(52.dp)
+                .width(104.dp),
             contentPadding = PaddingValues(0.dp),
             colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.surface)
         ) {
             Text(
                 text = "${gadget.batteryCharge}%",
                 style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.padding(start = 49.dp),
+                modifier = Modifier.padding(start = 46.dp),
                 color = MaterialTheme.colorScheme.onBackground
             )
         }
@@ -145,10 +145,10 @@ fun SampleScreen(
             modifier = Modifier
                 .align(Alignment.TopStart)
                 .padding(
-                    top = 16.dp,
-                    start = 20.dp
+                    top = 13.dp,
+                    start = 12.dp
                 )
-                .size(55.dp),
+                .size(52.dp),
             contentPadding = PaddingValues(0.dp),
             colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.surface)
         ) {
@@ -160,6 +160,33 @@ fun SampleScreen(
                 colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onBackground)
             )
         }
+        Box {
+            TextButton(
+                onClick = { isModelPickerVisible = !isModelPickerVisible },
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = MaterialTheme.colorScheme.onBackground
+                ),
+                modifier = Modifier
+                    .padding(start = (52 + 14).dp, top = 13.dp)
+                    .height(52.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.AutoAwesome,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp)
+                )
+                Text(
+                    text = "Выбор модели",
+                    fontSize = 16.sp,
+                    modifier = Modifier.padding(start = 6.dp)
+                )
+                AIModelPicker(
+                    expanded = isModelPickerVisible,
+                    onDismiss = { isModelPickerVisible = false },
+                    onItemClick = { println("lool") }
+                )
+            }
+        }
 
         /*-----------------------------------------------------------------------------*/
 
@@ -168,10 +195,10 @@ fun SampleScreen(
             modifier = Modifier
                 .align(Alignment.TopEnd)
                 .padding(
-                    top = 16.dp,
+                    top = 13.dp,
                     end = 66.dp
                 )
-                .size(55.dp),
+                .size(52.dp),
             contentPadding = PaddingValues(0.dp),
             colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary)
         ) {
@@ -318,4 +345,3 @@ fun SampleScreen(
         )
     }
 }
-

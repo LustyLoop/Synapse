@@ -5,6 +5,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
@@ -22,26 +23,30 @@ import data.ChatMessageBox
 import data.UserAndAiMessages
 
 @Composable
-fun AiMessageMarkdown(box: ChatMessageBox){
-
-
+fun AiMessageMarkdown(box: ChatMessageBox, isStreaming: Boolean = false){
+    val textColor = if (box.errorFlag) Color.Red else MaterialTheme.colorScheme.onSurface
+    val colors = markdownColor(
+        text = textColor,
+        codeBackground = Color(0xFF2D2D2D),
+        dividerColor = Color.Gray,
+    )
+    val typography = typography()
+    val components = remember {
+        markdownComponents(
+            codeBlock = { MarkdownHighlightedCodeBlock(it.content, it.node, showHeader = true) },
+            codeFence = { MarkdownHighlightedCodeFence(it.content, it.node, showHeader = true) }
+        )
+    }
     Markdown(
         modifier = Modifier.padding(8.dp),
         markdownState = rememberMarkdownState(
             content = box.text,
             retainState = true,
-            immediate = false
+            immediate = !isStreaming
         ),
-        colors = markdownColor(
-            text = if(box.errorFlag) Color.Red else MaterialTheme.colorScheme.onSurface,
-            codeBackground = Color(0xFF2D2D2D),
-            dividerColor = Color.Gray,
-        ),
-        typography = typography(),
-        components = markdownComponents(
-            codeBlock = { MarkdownHighlightedCodeBlock(it.content, it.node, showHeader = true) },
-            codeFence = { MarkdownHighlightedCodeFence(it.content, it.node, showHeader = true) }
-        )
+        colors = colors,
+        typography = typography,
+        components = components
     )
 }
 

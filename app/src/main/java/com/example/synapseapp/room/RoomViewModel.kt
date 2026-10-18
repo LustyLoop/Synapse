@@ -13,10 +13,14 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import data.ChatMessageBox
 import data.DrawerItemsType
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class RoomViewModel(database: MainDb) : ViewModel() {
     private val db = database
+    private val gson = Gson()
+    private val chatListType = object : TypeToken<List<ChatMessageBox>>() {}.type
 
     fun insertDrawerItem(id: String, title: String, messages: List<ChatMessageBox>) {
         viewModelScope.launch {
@@ -31,16 +35,13 @@ class RoomViewModel(database: MainDb) : ViewModel() {
         }
     }
 
-    suspend fun getWholeChatById(id: String): List<ChatMessageBox> {
-        val jsonString = db.dao.getWholeChatById(id) ?: return emptyList()
-        val gson = Gson()
-        val result: List<ChatMessageBox> = gson.fromJson(
-            jsonString,
-            object : TypeToken<List<ChatMessageBox>>() {}.type
-        )
-        Log.v("result", result.toString())
-        return result
-    }
+
+
+    suspend fun getWholeChatById(id: String): List<ChatMessageBox> =
+        withContext(Dispatchers.Default) {
+            val jsonString = db.dao.getWholeChatById(id) ?: return@withContext emptyList()
+            gson.fromJson<List<ChatMessageBox>>(jsonString, chatListType)
+        }
 
     fun getShortItems(allChats: SnapshotStateList<DrawerItemsType>) {
         viewModelScope.launch {
@@ -55,7 +56,7 @@ class RoomViewModel(database: MainDb) : ViewModel() {
                 )
                 Log.v("item.wholeChat",item.toString())
             }
-
+            Log.v("allChats", allChats.toString())
         }
     }
 

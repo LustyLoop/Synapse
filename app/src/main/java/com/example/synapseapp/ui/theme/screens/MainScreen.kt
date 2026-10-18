@@ -1,6 +1,7 @@
 package com.example.synapseapp.ui.theme.screens
 
 
+import android.util.Log
 import androidx.compose.material3.DrawerState
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -22,6 +23,7 @@ fun MainScreen(
     roomViewModel: RoomViewModel
 ) {
     drawerItemsOfChats.setAllChats(roomViewModel)
+    Log.v("MAIN SCREEEN", "MAIN SCREEN WORK")
     SampleScreen(
         navController = navController,
         BottomBox = ::TextFieldBottomBox,

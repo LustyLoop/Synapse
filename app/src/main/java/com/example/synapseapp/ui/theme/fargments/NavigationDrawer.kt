@@ -4,7 +4,9 @@ import android.annotation.SuppressLint
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,6 +22,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material3.DismissibleDrawerSheet
@@ -38,7 +41,9 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
@@ -61,7 +66,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import viewModel.GadgetInfo
 
-
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SampleOfNavigationDrawer(
     scope: CoroutineScope,
@@ -80,124 +85,111 @@ fun SampleOfNavigationDrawer(
         //.verticalScroll(rememberScrollState())
     ) {
         item {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(60.dp)
-        ) {
-            Text(
-                "Synapse",
+            Row(
                 modifier = Modifier
-                    .padding(
-                        start = 12.dp,
-                        end = 12.dp,
-                        top = 8.dp,
-                        bottom = 12.dp
-                    )
-                    .weight(1f),
-                style = MaterialTheme.typography.titleLarge
-            )
-            IconButton(
-                onClick = {
-                    scope.launch {
-                        drawerState.close()
-                    }
-                },
-                modifier = Modifier
-                    .size(48.dp)
-            )
-            {
-                Icon(
-                    imageVector = TablerIcons.Outlined.X,
-                    contentDescription = "Закрыть меню",
-                    tint = MaterialTheme.colorScheme.onBackground
-                )
-
-            }
-        }
-        ShowNavigationDrawerItem(
-            labelText = "Новый чат",
-            iconId = TablerIcons.Outlined.Edit,
-            textStartPaddingValue = 6.dp,
-            onClick = {
-                UserAndAiMessages.createNewChat()
-                scope.launch {
-                    drawerState.close()
-                }
-            }
-        )
-        ShowNavigationDrawerItem(
-            labelText = "Выбор модели ИИ",
-            iconId = Icons.Rounded.AutoAwesome,
-            textStartPaddingValue = 6.dp
-        )
-        ShowNavigationDrawerItem(
-            labelText = "Камера",
-            imageId = R.drawable.glasses_camera_ic,
-            textStartPaddingValue = 4.dp
-        )
-        ShowNavigationDrawerItem(
-            labelText = "Галерея",
-            iconId = TablerIcons.Outlined.LibraryPhoto,
-            badgeText = "20",
-            textStartPaddingValue = 6.dp
-        )
-        ShowNavigationDrawerItem(
-            labelText = "Настройки",
-            iconId = TablerIcons.Outlined.Settings,
-            textStartPaddingValue = 6.dp
-        )
-        Spacer(Modifier.height(10.dp))
-        Text(
-            "История чатов",
-            modifier = Modifier.padding(start = 20.dp),
-            style = MaterialTheme.typography.titleMedium
-        )
-        Spacer(Modifier.height(6.dp))
-            }
-            items(
-                items = drawerItemsOfChats.allChats.reversed(),
-                key = { item -> item.id }
-            ) { item ->
-                NavigationDrawerItem(
-                    modifier = Modifier.height(50.dp),
-                    label = {
-                        Text(
-                            text = item.title,
-                            modifier = Modifier.padding(start = 4.dp),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onBackground
+                    .fillMaxWidth()
+                    .height(60.dp)
+            ) {
+                Text(
+                    "Synapse",
+                    modifier = Modifier
+                        .padding(
+                            start = 12.dp,
+                            end = 12.dp,
+                            top = 8.dp,
+                            bottom = 12.dp
                         )
-                    },
-                    selected = false,
+                        .weight(1f),
+                    style = MaterialTheme.typography.titleLarge
+                )
+                IconButton(
                     onClick = {
-                        drawerItemsOfChats.showSelectedChat(item.id, roomViewModel)
                         scope.launch {
                             drawerState.close()
                         }
                     },
-                    badge = {
-                        IconButton(onClick = {}) {
-                            TriplePoint()
-                        }
+                    modifier = Modifier
+                        .size(48.dp)
+                )
+                {
+                    Icon(
+                        imageVector = TablerIcons.Outlined.X,
+                        contentDescription = "Закрыть меню",
+                        tint = MaterialTheme.colorScheme.onBackground
+                    )
+
+                }
+            }
+            ShowNavigationDrawerItem(
+                labelText = "Новый чат",
+                iconId = TablerIcons.Outlined.Edit,
+                textStartPaddingValue = 6.dp,
+                onClick = {
+                    UserAndAiMessages.createNewChat()
+                    scope.launch {
+                        drawerState.close()
                     }
+                }
+            )
+            ShowNavigationDrawerItem(
+                labelText = "Камера",
+                imageId = R.drawable.glasses_camera_ic,
+                textStartPaddingValue = 4.dp
+            )
+            ShowNavigationDrawerItem(
+                labelText = "Галерея",
+                iconId = TablerIcons.Outlined.LibraryPhoto,
+                badgeText = "20",
+                textStartPaddingValue = 6.dp
+            )
+            ShowNavigationDrawerItem(
+                labelText = "Настройки",
+                iconId = TablerIcons.Outlined.Settings,
+                textStartPaddingValue = 6.dp
+            )
+            Spacer(Modifier.height(10.dp))
+            Text(
+                "История чатов",
+                modifier = Modifier.padding(start = 20.dp),
+                style = MaterialTheme.typography.titleMedium
+            )
+            Spacer(Modifier.height(6.dp))
+        }
+        items(
+            items = drawerItemsOfChats.allChats.asReversed(),
+            key = { item -> item.id }
+        ) { item ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp)
+                    .clip(RoundedCornerShape(28.dp))
+                    .combinedClickable(
+                        onClick = {
+                            Log.v("onClickInNavigationDrawer", "Click!")
+                            drawerItemsOfChats.showSelectedChat(item.id, roomViewModel)
+                            scope.launch { drawerState.close() }
+                        },
+                        onLongClick = {
+                            Log.v("onLongClickInNavigationDrawer", "Long Click!")
+                        }
+                    )
+                    .padding(horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ){
+                Text(
+                    text = item.title,
+                    modifier = Modifier.padding(start = 4.dp),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onBackground
                 )
             }
+        }
     }
 }
 
-@Composable
-fun TriplePoint() {
-    Icon(
-        imageVector = TablerIcons.Outlined.DotsVertical,
-        contentDescription = "",
-        modifier = Modifier.size(18.dp),
-        tint = MaterialTheme.colorScheme.onBackground
-    )
-
-}
 
 @SuppressLint("CoroutineCreationDuringComposition")
 @OptIn(ExperimentalMaterial3Api::class)

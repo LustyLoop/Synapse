@@ -3,6 +3,7 @@ package data
 import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.aallam.openai.api.chat.ChatRole
@@ -32,10 +33,9 @@ class DrawerItemsOfChats : ViewModel() {
         }
         currentChatId = id
         viewModelScope.launch {
-            //val targetChat = allChats.find { it.id == id }
             UserAndAiMessages.userAndAiMessages.clear()
             ChatHistory.clear()
-            val currentWholeChat: List<ChatMessageBox> = roomViewModel.getWholeChatById(id)
+            val currentWholeChat: List<ChatMessageBox> = roomViewModel.getWholeChatById(id).toList()
 
             if (currentWholeChat.isNotEmpty()) {
                 UserAndAiMessages.userAndAiMessages.addAll(currentWholeChat)
