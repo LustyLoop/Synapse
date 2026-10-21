@@ -71,7 +71,6 @@ class AiClient {
         message: String,
         temperature: Double = 0.7,
         maxTokens: Int = 900,
-        aiModel: String = "deepseek/deepseek-v4.1-flash",
         drawerItemsOfChats: DrawerItemsOfChats?,
         roomViewModel: RoomViewModel?,
         onText: (String) -> Unit
@@ -97,11 +96,11 @@ class AiClient {
         ChatHistory.addMessage(ChatRole.User, message)
 
         val request = ChatCompletionRequest(
-            model = ModelId(aiModel),
+            model = ModelId(AI.currentAIModelForRequest),
             temperature = temperature,
             maxTokens = maxTokens,
             messages = ChatHistory.allChatList,
-            reasoningEffort = Effort("none"),
+            //reasoningEffort = Effort("none"),
             //webSearchOptions = WebSearchOptions()
         )
 
@@ -113,7 +112,7 @@ class AiClient {
             )
         )
         return try {
-            var content: String = "###### ${aiModel.substringAfter("/")}" + "  \n"
+            var content: String = "###### ${AI.currentAIModelForRequest.substringAfter("/")}" + "  \n"
             openAI.chatCompletions(
                 request = request,
                 requestOptions = requestOptions
@@ -149,5 +148,6 @@ class AiClient {
 }
 
 object AI {
+    var currentAIModelForRequest = "deepseek/deepseek-v4.1-flash"
     val ai = AiClient()
 }
