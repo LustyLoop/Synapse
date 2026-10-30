@@ -1,25 +1,30 @@
 package com.example.synapseapp.ui.theme.fargments
 
-import android.util.Log
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ChevronLeft
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,20 +43,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.synapseapp.airequests.AI
 import com.example.synapseapp.airequests.api.API
-
-
-import io.ktor.client.*
-import io.ktor.client.call.*
-import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.client.request.*
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.request.get
 import io.ktor.client.request.header
-import io.ktor.serialization.kotlinx.json.*
+import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import kotlin.String
 import kotlin.math.pow
 import kotlin.math.round
-
 
 @Serializable
 data class PricingUnits(
@@ -105,9 +109,8 @@ data class AiModel(
     var isSelected: Boolean = false
 )
 
-var popularAIModelsList: List<AiModel> = mutableListOf()
-var otherAIModelsList: List<AiModel> = mutableListOf()
-
+var popularAIModelsList by mutableStateOf<List<AiModel>>(emptyList())
+var otherAIModelsList by mutableStateOf<List<AiModel>>(emptyList())
 
 val mainAICompanies = listOf("google/gemini", "anthropic", "openai/gpt", "deepseek")
 
@@ -120,12 +123,48 @@ val client = HttpClient {
     }
 }
 
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+fun CenteredLoadingIndicator(
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(500.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        LoadingIndicator(
+            modifier = Modifier.size(80.dp)
+        )
+    }
+}
+
 fun Double.roundDecimal(digits: Int): Double {
     val factor = 10.0.pow(digits.toDouble())
     return round(this * factor) / factor
 }
 
-suspend fun List<InfoOfAI>.structureModesInfo(): List<AiModel> = map { model ->
+private val VERSION_REGEX = Regex("""(\d+)(?:\.(\d+))?""")
+
+fun List<InfoOfAI>.topAISort(): List<InfoOfAI> =
+    mapNotNull { article ->
+        val name = article.name.substringAfter(": ", article.name).ifBlank { article.id }
+        val match = VERSION_REGEX.find(name) ?: return@mapNotNull null
+
+        val major = match.groups[1]?.value?.toIntOrNull() ?: return@mapNotNull null
+        val minor = match.groups[2]?.value?.toIntOrNull() ?: 0
+
+        article to (major to minor)
+    }
+        .groupBy { it.second.first }
+        .flatMap { (_, group) ->
+            group.sortedBy { it.second.second }
+                .takeLast(5)
+                .map { it.first }
+        }
+
+fun List<InfoOfAI>.structureModesInfo(): List<AiModel> = map { model ->
     val promptPrice = if (model.pricing_units.prompt == "token")
         (model.pricing.prompt ?: 0.0) * 1_000_000
     else 0.0
@@ -143,34 +182,44 @@ suspend fun List<InfoOfAI>.structureModesInfo(): List<AiModel> = map { model ->
     )
 }
 
-val VERSION_REGEX = Regex("""(\d+(?:\.\d+)?)""")
-
-fun versionOf(name: String): Double =
-    VERSION_REGEX.find(name)?.groupValues?.get(1)?.toDoubleOrNull() ?: 0.0
-
-suspend fun shapeIntoModels(
+fun shapeIntoPopularAIModels(
     responseList: MutableList<InfoOfAI>?
-) {
-    if (responseList == null) return
+) : Boolean {
+    if (responseList == null) return false
     responseList.removeIf { it.id.contains('~') }
 
+    if (popularAIModelsList.isEmpty())
     popularAIModelsList = mainAICompanies
         .flatMap { company ->
-            responseList.filter { article ->
-                article.id.contains(company, ignoreCase = true) &&
-                        article.architecture.output_modalities == listOf("text")
-            }
+            responseList
+                .filter {
+                    it.id.contains(company, ignoreCase = true) &&
+                            it.architecture.output_modalities == listOf("text")
+                }
+                .topAISort()
                 .takeLast(10)
+                .asReversed()
         }
-        .structureModesInfo()
-        .groupBy { it.provider }
-        .flatMap { (_, group) ->
-            group.sortedByDescending { versionOf(it.name) }
-        }
+        .structureModesInfo().toMutableList()
+    return true
+}
+suspend fun shapeIntoOtherAIModels(
+    responseList: MutableList<InfoOfAI>?
+) : Boolean {
+    if (responseList == null) return false
+    responseList.removeIf { it.id.contains('~') }
 
-    otherAIModelsList = responseList.filter { article ->
-        mainAICompanies.none { word -> article.id.contains(word, ignoreCase = true) }
-    }.structureModesInfo()
+    if(otherAIModelsList.isEmpty()) {
+        otherAIModelsList = responseList
+            .filter { article ->
+                mainAICompanies.none { word -> article.id.contains(word, ignoreCase = true) }
+            }
+            .groupBy { it.id.substringBefore("/") }
+            .flatMap { (_, group) -> group.take(10) }
+            .structureModesInfo()
+            .toMutableList()
+    }
+    return true
 }
 
 suspend fun fetchCredits(): Double? {
@@ -198,18 +247,21 @@ suspend fun fetchAIModelsCatalog(): MutableList<InfoOfAI>? {
 }
 
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun AIModelPicker(
     expanded: Boolean,
     onDismiss: () -> Unit,
     onItemClick: (String) -> Unit
 ) {
+    val responseList: MutableList<InfoOfAI>? = runBlocking {
+        fetchAIModelsCatalog()?.toMutableList()
+    }
 
     LaunchedEffect(Unit) {
-        val responseList: MutableList<InfoOfAI>? = fetchAIModelsCatalog()
-        //println("баланс: ${fetchCredits()}")
-        shapeIntoModels(responseList)
-        client.close()
+
+
+
     }
     DropdownMenu(
         expanded = expanded,
@@ -223,18 +275,32 @@ fun AIModelPicker(
     ) {
         // Log.v("popularAIModelsList", popularAIModelsList.toString())
         var showOtherModels by remember { mutableStateOf(false) }
-        if (!showOtherModels) GroupOfModel(
-            onItemClick = onItemClick,
-            onDismiss = onDismiss,
-            popularAIModelsList
-        )
-        else {
+
+        if (!showOtherModels) {
+            var popularAIModelsIsReady by remember { mutableStateOf(false) }
+
+            LaunchedEffect(responseList) {
+                popularAIModelsIsReady = withContext(Dispatchers.IO) {
+                    shapeIntoPopularAIModels(responseList)
+                }
+            }
+            if (!popularAIModelsIsReady) {
+                CenteredLoadingIndicator()
+            }
+            else
+                GroupOfModel(
+                    onItemClick = onItemClick,
+                    onDismiss = onDismiss,
+                    popularAIModelsList
+                )
+
+        } else {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(shape = RoundedCornerShape(28.dp))
                     .clickable { showOtherModels = false }
-                    .padding(horizontal = 16.dp,vertical = 8.dp),
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
@@ -256,8 +322,25 @@ fun AIModelPicker(
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp),
                 thickness = 1.dp
             )
-            GroupOfModel(onItemClick = onItemClick, onDismiss = onDismiss, otherAIModelsList)
+            var otherAIModelsIsReady by remember { mutableStateOf(false) }
+
+            LaunchedEffect(responseList) {
+                otherAIModelsIsReady = withContext(Dispatchers.IO) {
+                    shapeIntoOtherAIModels(responseList)
+                }
+            }
+
+            if (!otherAIModelsIsReady) {
+                CenteredLoadingIndicator()
+            }
+            else
+                GroupOfModel(
+                    onItemClick = onItemClick,
+                    onDismiss = onDismiss,
+                    otherAIModelsList
+                )
         }
+
 
         Row(
             modifier = Modifier
