@@ -22,7 +22,7 @@ half blob(float2 p, float2 c, float size) {
     return smoothstep(size, 0.0, d);
 }
 
-// Фрактальный шум (без изменений)
+// Фрактальный шум
 float noise(float2 p) {
     return fract(
         sin(dot(p, float2(127.1, 311.7))) *
@@ -54,7 +54,7 @@ half4 main(float2 fragCoord) {
     float t = time * 0.52;
 
     // КРУГ
-    float radius = 0.16;
+    float radius = 0.1;
     float dist = length(p);
     float mask = 1.0 - smoothstep(radius - 0.02, radius + 0.02, dist);
 

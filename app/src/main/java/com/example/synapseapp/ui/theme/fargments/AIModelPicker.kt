@@ -1,6 +1,7 @@
 package com.example.synapseapp.ui.theme.fargments
 
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -38,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -127,6 +130,7 @@ val client = HttpClient {
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun CenteredLoadingIndicator(
+    downwardOffset: Dp = 0.dp
 ) {
     Box(
         modifier = Modifier
@@ -135,7 +139,7 @@ fun CenteredLoadingIndicator(
         contentAlignment = Alignment.Center
     ) {
         LoadingIndicator(
-            modifier = Modifier.size(80.dp)
+            modifier = Modifier.size(80.dp).offset(y = downwardOffset)
         )
     }
 }
@@ -148,21 +152,21 @@ fun Double.roundDecimal(digits: Int): Double {
 private val VERSION_REGEX = Regex("""(\d+)(?:\.(\d+))?""")
 
 fun List<InfoOfAI>.topAISort(): List<InfoOfAI> =
-    mapNotNull { article ->
-        val name = article.name.substringAfter(": ", article.name).ifBlank { article.id }
+    mapNotNull { model ->
+        val name = model.name.substringAfter(": ", model.name).ifBlank { model.id }
         val match = VERSION_REGEX.find(name) ?: return@mapNotNull null
 
         val major = match.groups[1]?.value?.toIntOrNull() ?: return@mapNotNull null
         val minor = match.groups[2]?.value?.toIntOrNull() ?: 0
 
-        article to (major to minor)
+        Triple(model, major, minor)
     }
-        .groupBy { it.second.first }
-        .flatMap { (_, group) ->
-            group.sortedBy { it.second.second }
-                .takeLast(5)
-                .map { it.first }
-        }
+        // от новых к старым: 4.1 -> 3.8 -> 3.7 -> 2.5
+        .sortedWith(
+            compareByDescending<Triple<InfoOfAI, Int, Int>> { it.second }
+                .thenByDescending { it.third }
+        )
+        .map { it.first }
 
 fun List<InfoOfAI>.structureModesInfo(): List<AiModel> = map { model ->
     val promptPrice = if (model.pricing_units.prompt == "token")
@@ -188,19 +192,30 @@ fun shapeIntoPopularAIModels(
     if (responseList == null) return false
     responseList.removeIf { it.id.contains('~') }
 
-    if (popularAIModelsList.isEmpty())
-    popularAIModelsList = mainAICompanies
-        .flatMap { company ->
-            responseList
-                .filter {
-                    it.id.contains(company, ignoreCase = true) &&
-                            it.architecture.output_modalities == listOf("text")
-                }
-                .topAISort()
-                .takeLast(10)
-                .asReversed()
-        }
-        .structureModesInfo().toMutableList()
+    if (popularAIModelsList.isEmpty()) {
+        Log.v("popularAIModelsList", mainAICompanies
+            .flatMap { company ->
+                responseList
+                    .filter {
+                        it.id.contains(company, ignoreCase = true) &&
+                                it.architecture.output_modalities == listOf("text")
+                    }
+                    .topAISort()}.toString()
+        )
+
+        popularAIModelsList = mainAICompanies
+            .flatMap { company ->
+                responseList
+                    .filter {
+                        it.id.contains(company, ignoreCase = true) &&
+                                it.architecture.output_modalities == listOf("text")
+                    }
+                    .topAISort()
+                    .take(10)
+            }
+            .structureModesInfo()
+            .toMutableList()
+    }
     return true
 }
 suspend fun shapeIntoOtherAIModels(
@@ -254,14 +269,10 @@ fun AIModelPicker(
     onDismiss: () -> Unit,
     onItemClick: (String) -> Unit
 ) {
-    val responseList: MutableList<InfoOfAI>? = runBlocking {
-        fetchAIModelsCatalog()?.toMutableList()
-    }
+    var responseList by remember { mutableStateOf<MutableList<InfoOfAI>?>(null) }
 
     LaunchedEffect(Unit) {
-
-
-
+        responseList = withContext(Dispatchers.IO) { fetchAIModelsCatalog() }
     }
     DropdownMenu(
         expanded = expanded,
@@ -286,14 +297,13 @@ fun AIModelPicker(
             }
             if (!popularAIModelsIsReady) {
                 CenteredLoadingIndicator()
-            }
-            else
+            } else{
                 GroupOfModel(
                     onItemClick = onItemClick,
                     onDismiss = onDismiss,
                     popularAIModelsList
                 )
-
+        }
         } else {
             Row(
                 modifier = Modifier
@@ -331,7 +341,7 @@ fun AIModelPicker(
             }
 
             if (!otherAIModelsIsReady) {
-                CenteredLoadingIndicator()
+                CenteredLoadingIndicator(30.dp)
             }
             else
                 GroupOfModel(
