@@ -23,7 +23,7 @@ import data.ChatMessageBox
 import data.UserAndAiMessages
 
 @Composable
-fun AiMessageMarkdown(box: ChatMessageBox, isStreaming: Boolean = false){
+fun AiMessageMarkdown(box: ChatMessageBox, isStreaming: Boolean = false) {
     val textColor = if (box.errorFlag) Color.Red else MaterialTheme.colorScheme.onSurface
     val colors = markdownColor(
         text = textColor,
@@ -37,6 +37,7 @@ fun AiMessageMarkdown(box: ChatMessageBox, isStreaming: Boolean = false){
             codeFence = { MarkdownHighlightedCodeFence(it.content, it.node, showHeader = true) }
         )
     }
+
     Markdown(
         modifier = Modifier.padding(8.dp),
         markdownState = rememberMarkdownState(
@@ -49,6 +50,7 @@ fun AiMessageMarkdown(box: ChatMessageBox, isStreaming: Boolean = false){
         components = components
     )
 }
+
 
 @Composable
 fun typography() = markdownTypography(

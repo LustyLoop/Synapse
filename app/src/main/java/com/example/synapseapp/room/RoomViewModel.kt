@@ -37,11 +37,30 @@ class RoomViewModel(database: MainDb) : ViewModel() {
 
 
 
-    suspend fun getWholeChatById(id: String): List<ChatMessageBox> =
-        withContext(Dispatchers.Default) {
-            val jsonString = db.dao.getWholeChatById(id) ?: return@withContext emptyList()
-            gson.fromJson<List<ChatMessageBox>>(jsonString, chatListType)
+//    suspend fun getWholeChatById(id: String): List<ChatMessageBox> =
+//        withContext(Dispatchers.Default) {
+//            val jsonString = db.dao.getWholeChatById(id) ?: return@withContext emptyList()
+//            gson.fromJson<List<ChatMessageBox>>(jsonString, chatListType)
+//        }
+suspend fun getWholeChatById(id: String): List<ChatMessageBox> =
+    withContext(Dispatchers.Default) {
+
+        Log.d("ROOM_DEBUG", "REQUESTED ID = '$id'")
+
+        val jsonString = db.dao.getWholeChatById(id)
+
+        Log.d("ROOM_DEBUG", "JSON FROM DB = '$jsonString'")
+
+        if (jsonString == null) {
+            Log.e("ROOM_DEBUG", "CHAT NOT FOUND FOR ID = '$id'")
+            return@withContext emptyList()
         }
+
+        gson.fromJson<List<ChatMessageBox>>(
+            jsonString,
+            chatListType
+        ) ?: emptyList()
+    }
 
     fun getShortItems(allChats: SnapshotStateList<DrawerItemsType>) {
         viewModelScope.launch {

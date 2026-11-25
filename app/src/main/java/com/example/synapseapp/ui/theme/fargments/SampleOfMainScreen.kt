@@ -239,7 +239,7 @@ fun SampleScreen(
                                         .padding(
                                             top = 15.dp,
                                             end = 5.dp,
-                                            start = 40.dp
+                                            start = 100.dp
                                         )
                                         .background(
                                             MaterialTheme.colorScheme.surfaceVariant,

@@ -27,8 +27,8 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = true
-            isShrinkResources = true
+            isMinifyEnabled = false
+            isShrinkResources = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -95,9 +95,9 @@ dependencies {
     ksp("androidx.room3:room3-compiler:3.0.3")
 
 
-    implementation("com.mikepenz:multiplatform-markdown-renderer:0.43.0")
-    implementation("com.mikepenz:multiplatform-markdown-renderer-m3:0.43.0")
-    implementation("com.mikepenz:multiplatform-markdown-renderer-code:0.43.0")
+    implementation("com.mikepenz:multiplatform-markdown-renderer:0.46.0")
+    implementation("com.mikepenz:multiplatform-markdown-renderer-m3:0.46.0")
+    implementation("com.mikepenz:multiplatform-markdown-renderer-code:0.46.0")
     implementation("dev.seyfarth:tabler-icons-kmp:1.0.0")
     implementation("androidx.graphics:graphics-core:1.0.0")
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
